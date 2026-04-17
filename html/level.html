@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Fields Of Crystil</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body class="level">
+    <div id="resource-hud">
+        <span id="scraps-icon">●</span>
+        <span id="scraps-label">Scraps:</span>
+        <span id="scraps-amount">10</span>
+    </div>
+    <div class="game-wrapper">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+        <div id="ui-panel">
+            <div id="building-ui" class="ui-section hidden">
+                <h2>Building</h2>
+                <button id="train-unit-btn">Train Unit</button>
+                <div id="train-info">
+                    <span id="train-time-label"></span>
+                </div>
+                <div id="train-progress" class="progress hidden">
+                    <div id="train-progress-fill"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/gameCore.js"></script>
+</body>
+</html>

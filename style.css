@@ -1,0 +1,113 @@
+/* General reset-ish */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: system-ui, sans-serif;
+    background: #043715;
+    color: #f0f4ff;
+}
+
+/* Menu screen */
+.main-menu {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-container {
+    text-align: center;
+}
+
+.menu-container h1 {
+    margin-bottom: 0.5rem;
+}
+
+.menu-container button {
+    margin-top: 1rem;
+    padding: 0.5rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+/* Level screen */
+.level {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#gameCanvas {
+    border: 2px solid #3a4a7a;
+    background: radial-gradient(circle at center, #46f293, #0f4f3a);
+}
+
+.game-wrapper {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+#resource-hud {
+  position: fixed;
+  top: 8px;
+  right: 12px;
+  color: #f0f4ff;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 10;
+}
+
+#scraps-icon {
+  color: #b87333; /* copper color to match the node [web:119] */
+  font-size: 16px;
+}
+
+#scraps-amount {
+  font-weight: bold;
+  color: #b87333;
+}
+
+#ui-panel {
+    color: #f0f4ff;
+    font-size: 14px;
+}
+
+.ui-section.hidden {
+    display: none;
+}
+
+#building-ui button {
+    margin-top: 0.5rem;
+    padding: 0.25rem 1rem;
+    cursor: pointer;
+}
+
+#train-info {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #cfd8ff;
+}
+
+.progress {
+  margin-top: 0.5rem;
+  width: 150px;
+  height: 10px;
+  border: 1px solid #f0f4ff;
+  background: rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress.hidden {
+  display: none;
+}
+
+#train-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: #46f293;
+  transition: width 0.1s linear;
+}

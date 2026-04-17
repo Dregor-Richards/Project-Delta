@@ -1,0 +1,46 @@
+ - Make Build Queue
+ - Building Rally Point Line (Path, Visible While Selected)
+ - Make Gatherer return resources to building
+ - Move Order Marker (When telling to go somewhere, briefly shows marker to confirm it happened)
+ - Map
+ - Make Enemies
+ - Make Unit Have Attack
+ - Make Health Bars (& HP)
+ - Attack Move Command ("A" then click)
+ - Military Unit Stances
+ - Make Gatherers Fight Back When Attacked !!!
+ - Minimap (Later)
+ - Change cursor for context (Hovered enemy, selectable character, etc.)
+ - Visual Assets (Later)
+ - Pop Cap (& Visual Tracker)
+ - Make Units cluster, Collisions
+ - Make Drag select military gatherer specific
+ - Background music
+ - Select Noise
+ - Build Noise
+ - Gather Start Noise
+ - Shift Queue Orders
+ - Double-Click Select All Same Type
+ - Control Groups (Crtl+1, etc.)
+ - Idle Worker Hotkey
+ - Right Click Context (Enemy=Attack, Resource=Mine, etc.)
+ - UI Panel for selected Unit/Building
+ - Resource/Income Rate Indicator
+ - Add Secondary "Rare" Resource
+ - Add Third "Craftable" Resource
+ - Upgrades (And An Upgrade Building Or 2)
+ - Defensive Buildings (Walls, Attacker)
+ - Production Queue Per Building Display
+ - Don't Forget === Help & Tooltips!!!
+ - Selection Highlight (For Resources As Well)
+ - Pause & Time Adjust
+ - Restart level button
+ - Objective Tracker (For Later Quests, Scenario Levels, etc.)
+ - Volume Mechanics For Music/SFX
+ - Camera Controls (WASD, Zoom, Pan-Edge-Of-Screen)
+ - Chatbox (& Cheats)
+
+
+
+Add simple enemy scripting.
+Only then add combat polish, balance, and nicer visuals.
