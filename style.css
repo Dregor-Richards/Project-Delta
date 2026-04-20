@@ -1,4 +1,6 @@
-/* General reset-ish */
+    /* UNIVERSAL (HTML) ELEMENTS */
+
+
 html, body {
     margin: 0;
     padding: 0;
@@ -8,7 +10,14 @@ html, body {
     color: #f0f4ff;
 }
 
-/* Menu screen */
+.hidden {
+  display: none;
+}
+
+
+    /* INDEX PAGE ELEMENTS */
+
+
 .main-menu {
     display: flex;
     align-items: center;
@@ -30,7 +39,140 @@ html, body {
     cursor: pointer;
 }
 
-/* Level screen */
+
+    /* SETUP PAGE UI ELEMENTS */
+
+
+body.setup-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    /* Use the same green as the base page */
+    background: #043715;
+    color: #f0f4ff;
+    font-family: system-ui, sans-serif;
+}
+
+.setup-container {
+    max-width: 900px;
+    width: 100%;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+}
+
+.setup-section {
+    margin-bottom: 24px;
+}
+
+.setup-section h2 {
+    margin-bottom: 12px;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.faction-grid {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.faction-card {
+    flex: 1 1 0;
+    min-width: 160px;
+    padding: 16px;
+    border-radius: 6px;
+    border: 2px solid #555;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.15s ease, transform 0.1s ease, background 0.15s ease;
+    background: rgba(20, 20, 30, 0.8);
+}
+
+.faction-card h3 {
+    margin: 0 0 8px;
+}
+
+.faction-card p {
+    margin: 0;
+    font-size: 0.85rem;
+    opacity: 0.85;
+}
+
+.faction-card.selected {
+    border-color: #ff8c1a;
+    box-shadow: 0 0 10px rgba(255, 140, 26, 0.7);
+    transform: translateY(-2px);
+}
+
+.faction-card.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-style: dashed;
+}
+
+/* Crimson for Malachordith */
+#faction-malachordith {
+  background-color: #dc143c; /* Crimson */
+}
+
+/* Lime for Foldari */
+#faction-foldari {
+  background-color: #32cd32; /* LimeGreen */
+}
+
+/* Violet for Shiervale */
+#faction-shiervale {
+  background-color: #8a2be2; /* BlueViolet */
+}
+
+/* Keep text readable on bright colors */
+#faction-malachordith h3,
+#faction-malachordith p,
+#faction-foldari h3,
+#faction-foldari p,
+#faction-shiervale h3,
+#faction-shiervale p {
+  color: #ffffff;
+}
+
+.setup-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.setup-row label {
+    min-width: 120px;
+}
+
+.setup-row select {
+    padding: 4px 8px;
+}
+
+.setup-footer {
+    margin-top: 24px;
+    text-align: right;
+}
+
+.setup-footer button {
+    padding: 10px 18px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.setup-footer button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+
+    /* LEVEL HUD/UI ELEMENTS */
+
+
 .level {
     display: flex;
     align-items: center;
@@ -46,6 +188,7 @@ html, body {
     display: flex;
     gap: 16px;
     align-items: flex-start;
+    position: relative;
 }
 
 #resource-hud {
@@ -55,24 +198,56 @@ html, body {
   color: #f0f4ff;
   font-size: 14px;
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;   /* stack rows vertically */
+  align-items: flex-end;    /* align text to the right edge */
+  gap: 2px;
   z-index: 10;
 }
 
-#scraps-icon {
-  color: #b87333; /* copper color to match the node [web:119] */
-  font-size: 16px;
+.hud-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-#scraps-amount {
-  font-weight: bold;
-  color: #b87333;
+.hud-icon {
+  font-size: 12px;
 }
+
+/* Scraps color */
+#scraps-icon,
+#scraps-amount {
+  color: #b87333;
+  font-weight: bold;
+}
+
+/* Placeholder colors for other resources */
+#olives-icon,
+#olives-amount {
+  color: #C0C0C0; /* yellowgreen-ish */
+}
+
+#prisms-icon,
+#prisms-amount {
+  color: #FFD700; /* lightskyblue */
+}
+
+/* Population colors */
+#pop-icon,
+#pop-amount,
+#pop-cap {
+  color: #f0f4ff;
+  font-weight: bold;
+}
+
+
+    /* BUILDING/UNIT UI PANEL ELEMENTS */
+
 
 #ui-panel {
-    color: #f0f4ff;
-    font-size: 14px;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
 }
 
 .ui-section.hidden {

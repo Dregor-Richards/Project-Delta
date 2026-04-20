@@ -7,24 +7,50 @@
 </head>
 <body class="level">
     <div id="resource-hud">
-        <span id="scraps-icon">●</span>
-        <span id="scraps-label">Scraps:</span>
-        <span id="scraps-amount">10</span>
+    <!-- Scraps -->
+    <div class="hud-row">
+        <span class="hud-icon" id="scraps-icon">●</span>
+        <span class="hud-label" id="scraps-label">Scraps:</span>
+        <span class="hud-value" id="scraps-amount">0</span>
+    </div>
+
+    <!-- Olives (placeholder) -->
+    <div class="hud-row">
+        <span class="hud-icon" id="olives-icon">●</span>
+        <span class="hud-label" id="olives-label">Olives:</span>
+        <span class="hud-value" id="olives-amount">0</span>
+    </div>
+
+    <!-- Prisms (placeholder) -->
+    <div class="hud-row">
+        <span class="hud-icon" id="prisms-icon">●</span>
+        <span class="hud-label" id="prisms-label">Prisms:</span>
+        <span class="hud-value" id="prisms-amount">0</span>
+    </div>
+
+    <!-- Population -->
+    <div class="hud-row">
+        <span class="hud-icon" id="pop-icon">👥</span>
+        <span class="hud-label" id="pop-label">Population:</span>
+        <span class="hud-value" id="pop-amount">0</span>
+        <span class="hud-value">/</span>
+        <span class="hud-value" id="pop-cap">0</span>
+    </div>
     </div>
     <div class="game-wrapper">
-        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <canvas id="gameCanvas" width="1100" height="650"></canvas>
 
         <div id="ui-panel">
-            <div id="building-ui" class="ui-section hidden">
-                <h2>Building</h2>
-                <button id="train-unit-btn">Train Unit</button>
-                <div id="train-info">
-                    <span id="train-time-label"></span>
-                </div>
-                <div id="train-progress" class="progress hidden">
-                    <div id="train-progress-fill"></div>
-                </div>
-            </div>
+        <div id="building-ui" class="ui-section hidden">
+        <button id="train-unit-btn">Train Unit</button>
+        <button id="build-barracks-btn" class="hidden">Build Barracks</button>
+        <div id="train-info">
+            <span id="train-time-label"></span>
+        </div>
+        <div id="train-progress" class="progress hidden">
+            <div id="train-progress-fill"></div>
+        </div>
+        </div>
         </div>
     </div>
 

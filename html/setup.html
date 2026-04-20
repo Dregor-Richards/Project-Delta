@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Setup – Mercenaries Of Armolga</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body class="setup-page">
+  <div class="setup-container">
+    <h1>Game Setup</h1>
+    <p>Select your faction and opponents before the battle begins.</p>
+
+    <!-- Faction selection -->
+    <div class="setup-section">
+    <h2>Faction</h2>
+    <div class="faction-grid">
+        <!-- Malachordith: disabled for now, first -->
+        <div class="faction-card disabled" data-faction="Malachordith" id="faction-malachordith">
+        <h3>Malachordith</h3>
+        <p>Coming soon.</p>
+        </div>
+
+        <!-- Foldari: enabled, middle -->
+        <div class="faction-card" data-faction="Foldari" id="faction-foldari">
+        <h3>Foldari</h3>
+        <p>Hardened mercenaries. Reliable fronts, solid economy.</p>
+        </div>
+
+        <!-- Shiervale: disabled, last -->
+        <div class="faction-card disabled" data-faction="Shiervale" id="faction-shiervale">
+        <h3>Shiervale</h3>
+        <p>Coming soon.</p>
+        </div>
+    </div>
+    </div>
+
+    <!-- AI enemies selection -->
+    <div class="setup-section">
+      <h2>Opponents</h2>
+      <div class="setup-row">
+        <label for="ai-count">AI Enemies:</label>
+        <select id="ai-count">
+          <option value="1" selected>1</option>
+          <option value="2" disabled>2 (coming soon)</option>
+          <option value="3" disabled>3 (coming soon)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Start button -->
+    <div class="setup-footer">
+      <button id="start-game-btn" disabled>Start Battle</button>
+    </div>
+  </div>
+
+  <script>
+    const factionCards = document.querySelectorAll('.faction-card');
+    const startBtn = document.getElementById('start-game-btn');
+    const aiSelect = document.getElementById('ai-count');
+
+    let selectedFaction = null;
+
+    factionCards.forEach(card => {
+      card.addEventListener('click', () => {
+        if (card.classList.contains('disabled')) {
+          return; // ignore clicks on disabled factions
+        }
+
+        // Clear previous selection
+        factionCards.forEach(c => c.classList.remove('selected'));
+
+        // Mark this one selected
+        card.classList.add('selected');
+        selectedFaction = card.dataset.faction;
+
+        // Enable Start button once a valid faction is chosen
+        startBtn.disabled = !selectedFaction;
+      });
+    });
+
+    startBtn.addEventListener('click', () => {
+      if (!selectedFaction) return;
+
+      const aiCount = parseInt(aiSelect.value, 10) || 1;
+
+      // Persist setup choices for level.html
+      localStorage.setItem('moa_playerFaction', selectedFaction);
+      localStorage.setItem('moa_aiCount', String(aiCount));
+
+      // Go to the level
+      window.location.href = 'level.html';
+    });
+  </script>
+</body>
+</html>

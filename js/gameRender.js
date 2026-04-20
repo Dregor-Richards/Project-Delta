@@ -1,5 +1,7 @@
 // Draw The Game
 
+const LOCAL_PLAYER_ID = 1;
+
 export function drawSelectionBox(ctx, dragStart, dragEnd, isDragging) {
     if (!isDragging) return;
     const x = dragStart.x;
@@ -28,17 +30,20 @@ export function drawCopperNode(ctx, node) {
 
 export function drawUnit(ctx, u) {
     const half = u.size / 2;
-    // Pick color by faction
+
+    // --- Color by ownerId instead of faction ---
     let baseColor;
-    if (u.faction === 'enemy') {
-        baseColor = '#ff4d4d';   // red-ish for enemies
+    if (u.ownerId === LOCAL_PLAYER_ID) {
+        baseColor = '#4da6ff';   // blue for local player
     } else {
-        baseColor = '#4da6ff';   // blue for player / default
+        baseColor = '#ff4d4d';   // red-ish for enemies / others
     }
+
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 2;
+
+    // --- Shape: gatherer = triangle, others = square ---
     if (u.type === 'gatherer') {
-        // Triangle
         ctx.fillStyle = baseColor;
         ctx.beginPath();
         ctx.moveTo(u.x, u.y - half);          // top
@@ -48,14 +53,46 @@ export function drawUnit(ctx, u) {
         ctx.fill();
         ctx.stroke();
     } else {
-        // Default: square for soldiers / others
         ctx.fillStyle = baseColor;
         ctx.beginPath();
         ctx.rect(u.x - half, u.y - half, u.size, u.size);
         ctx.fill();
         ctx.stroke();
     }
-    // Selection outline
+
+    // --- Health bar above unit ---
+    // Only show when damaged
+    if (
+        u.hp !== undefined &&
+        u.maxHp !== undefined &&
+        u.maxHp > 0 &&
+        u.hp < u.maxHp
+    ) {
+        const barWidth = u.size;        // same width as unit
+        const barHeight = 4;            // thin bar
+        const barOffset = 8;            // pixels above unit
+
+        const x = u.x - barWidth / 2;
+        const y = u.y - (u.size / 2) - barOffset - barHeight;
+
+        const ratio = Math.max(0, Math.min(1, u.hp / u.maxHp));
+
+        // Background
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        ctx.fillRect(x, y, barWidth, barHeight);
+
+        // Foreground (same color logic as before)
+        const hpColor = u.ownerId === 1 ? '#00ff66' : '#ff3333';
+        ctx.fillStyle = hpColor;
+        ctx.fillRect(x, y, barWidth * ratio, barHeight);
+
+        // Optional border
+        ctx.strokeStyle = 'rgba(0,0,0,0.9)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, barWidth, barHeight);
+    }
+
+    // --- Selection outline ---
     if (u.selected) {
         ctx.strokeStyle = '#ff5900';
         ctx.lineWidth = 3;
@@ -155,17 +192,30 @@ export function drawRallyPoint(ctx, b) {
     ctx.restore();
 }
 
-export function drawGrid(ctx, canvasWidth, canvasHeight) {
+export function drawGrid(ctx, canvasWidth, canvasHeight, camera) {
     ctx.strokeStyle = 'rgba(255,255,255,0.04)';
     ctx.lineWidth = 1;
     const gridSize = 40;
-    for (let x = 0; x <= canvasWidth; x += gridSize) {
+
+    const offsetX = camera ? camera.x : 0;
+    const offsetY = camera ? camera.y : 0;
+
+    // Find first vertical grid line visible in the viewport
+    let startX = - (offsetX % gridSize);
+    if (startX > 0) startX -= gridSize;
+
+    for (let x = startX; x <= canvasWidth; x += gridSize) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, canvasHeight);
         ctx.stroke();
     }
-    for (let y = 0; y <= canvasHeight; y += gridSize) {
+
+    // Horizontal lines
+    let startY = - (offsetY % gridSize);
+    if (startY > 0) startY -= gridSize;
+
+    for (let y = startY; y <= canvasHeight; y += gridSize) {
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(canvasWidth, y);

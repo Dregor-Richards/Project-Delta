@@ -1,16 +1,17 @@
---- 04/19 ---
- - Make Health Bars (& HP)
+Add on setup page, modal to pick map (Only 1 right now)
+Fog Of War!
+Finish Population.js
+
 --- 04/20 ---
  - Make gatherers Fight Back When Attacked
  - Right Click Content (Enemy=Attack, Resource=Mine, etc.)
  - Move Order Marker (When telling to go somewhere, briefly shows marker to confirm it happened)
 --- 04/21 ---
  - Make Drag select military gatherer specific
- - Selection Highlight (For Resources As Well)
+ - Add Hover Over Resources To See Remaining Value
  - Change cursor for context (Hovered enemy, selectable character, etc.)
 --- 04/22 ---
  - UI Panel for selected Unit/Building
- - Pop Cap (& Visual Tracker)
  - Resource/Income Rate Indicator
  - Production Queue Per Building Display
 --- 04/23 ---
@@ -23,8 +24,6 @@
  - Double-Click Select All Same Type
  - Control Grups (Ctrl+1, etc.)
  - Idle Worker Hotkey
---- 04/26 ---
- - Camera Controls (WASD, Zoom, Pan-Edge-Of-Screen)
 --- 04/27 ---
  - Pause & Time Adjust
  - Restart Level button
