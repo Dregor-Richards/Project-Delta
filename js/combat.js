@@ -7,7 +7,13 @@
  * @param {Array} params.units
  * @param {Function} params.findClosestEnemyInRange
  */
-export function updateCombat({ dt, units, findClosestEnemyInRange }) {
+export function updateCombat({
+  dt,
+  units,
+  findClosestEnemyInRange,
+  refreshPopulation,
+}) {
+
     // --- Attacks ---
     for (const u of units) {
         if (!u.hp || u.hp <= 0) continue;           // skip dead / non-combatants
@@ -33,7 +39,9 @@ export function updateCombat({ dt, units, findClosestEnemyInRange }) {
         if (u.hp !== undefined && u.hp <= 0) {
             console.log(`Unit ${u.type} died.`);
             units.splice(i, 1);
-            refreshPopulation();
+            if (refreshPopulation) {
+                refreshPopulation();
+            }
         }
     }
 }

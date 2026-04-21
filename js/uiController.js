@@ -6,7 +6,9 @@ export function createUIController({
   popCapEl,
   buildBarracksBtn,
   buildingUi,
-  trainBtn,
+  trainBtn,        // legacy, can be removed later
+  trainMeleeBtn,
+  trainRangedBtn,
   trainProgress,
   trainProgressFill,
   trainTimeLabel,
@@ -16,15 +18,16 @@ export function createUIController({
   refinery,
   // Costs
   MELEE_COST,
+  RANGED_COST,
   GATHERER_COST,
   BARRACKS_COST,
-  // Functions provided by main/population/etc.
+  // Functions...
   getPlayerUnitCount,
   getPopulationCap,
   spawnUnitFromBuilding,
-  // Scraps accessors so UI can read/write without owning the variable
   getScraps,
   setScraps,
+  constructionState,
 }) {
   // --- Internal helpers ---
 
@@ -54,23 +57,35 @@ export function createUIController({
     const anyGathererSelected = units.some(u => u.selected && u.role === 'gatherer');
     const anyBuildingSelected = refinery.selected || anyBarracksSelected;
 
-    // --- Panel visibility ---
+    // Panel visibility
     if (anyBuildingSelected || anyGathererSelected) {
       buildingUi.classList.remove('hidden');
     } else {
       buildingUi.classList.add('hidden');
     }
 
-    // --- Train button visibility ---
+    // Train button visibility
     if (trainBtn) {
-      if (anyBuildingSelected) {
-        trainBtn.classList.remove('hidden');
+      trainBtn.classList.add('hidden');
+    }
+
+    if (trainMeleeBtn) {
+      if (anyBarracksSelected || refinery.selected) {
+        trainMeleeBtn.classList.remove('hidden');
       } else {
-        trainBtn.classList.add('hidden');
+        trainMeleeBtn.classList.add('hidden');
       }
     }
 
-    // --- Build Barracks button visibility ---
+    if (trainRangedBtn) {
+      if (anyBarracksSelected) {
+        trainRangedBtn.classList.remove('hidden');
+      } else {
+        trainRangedBtn.classList.add('hidden');
+      }
+    }
+
+    // Build Barracks button visibility
     if (buildBarracksBtn) {
       buildBarracksBtn.textContent = `Build Barracks (${BARRACKS_COST} Scraps)`;
       if (anyGathererSelected && !anyBuildingSelected) {
@@ -84,15 +99,22 @@ export function createUIController({
   }
 
   function updateTrainControls() {
-    if (!trainBtn) return;
-
     const selectedBarracks = getSelectedBarracks();
     const anyBarracksSelected = !!selectedBarracks;
 
-    // No building selected — keep train disabled and progress hidden
+    const meleeBtn = trainMeleeBtn || trainBtn;
+    const rangedBtn = trainRangedBtn;
+
+    // No building selected — disable both and hide progress
     if (!refinery.selected && !anyBarracksSelected) {
-      trainBtn.disabled = true;
-      trainBtn.textContent = 'Train Unit';
+      if (meleeBtn) {
+        meleeBtn.disabled = true;
+        meleeBtn.textContent = 'Train Unit';
+      }
+      if (rangedBtn) {
+        rangedBtn.disabled = true;
+        rangedBtn.textContent = 'Train Ranged';
+      }
       if (trainTimeLabel) {
         trainTimeLabel.textContent = '';
       }
@@ -103,14 +125,21 @@ export function createUIController({
       return;
     }
 
-    // -------- Refinery selected: Train Gatherer --------
+    // -------- Refinery selected: Train Gatherer via melee button --------
     if (refinery.selected && !anyBarracksSelected) {
-      const cap = getPopulationCap(refinery.ownerId);
-      const atCap = getPlayerUnitCount(refinery.ownerId) >= cap;
+      const ownerId = refinery.ownerId;
+      const cap = getPopulationCap(ownerId);
+      const atCap = getPlayerUnitCount(ownerId) >= cap;
       const trainingActive = refinery.training;
 
-      trainBtn.disabled = atCap || trainingActive;
-      trainBtn.textContent = `Train Gatherer (${GATHERER_COST} Scraps)`;
+      if (meleeBtn) {
+        meleeBtn.disabled = atCap || trainingActive;
+        meleeBtn.textContent = `Train Gatherer (${GATHERER_COST} Scraps)`;
+      }
+      if (rangedBtn) {
+        rangedBtn.disabled = true;
+        rangedBtn.textContent = 'Train Ranged';
+      }
 
       if (trainTimeLabel) {
         trainTimeLabel.textContent =
@@ -134,15 +163,21 @@ export function createUIController({
       return;
     }
 
-    // -------- Barracks selected: Train Melee --------
+    // -------- Barracks selected: Train Melee or Ranged --------
     if (anyBarracksSelected) {
       const b = selectedBarracks;
       const cap = getPopulationCap(b.ownerId);
       const atCap = getPlayerUnitCount(b.ownerId) >= cap;
       const trainingActive = b.training;
 
-      trainBtn.disabled = atCap || trainingActive;
-      trainBtn.textContent = `Train Melee (${MELEE_COST} Scraps)`;
+      if (meleeBtn) {
+        meleeBtn.disabled = atCap || trainingActive;
+        meleeBtn.textContent = `Train Melee (${MELEE_COST} Scraps)`;
+      }
+      if (rangedBtn) {
+        rangedBtn.disabled = atCap || trainingActive;
+        rangedBtn.textContent = `Train Ranged (${RANGED_COST} Scraps)`;
+      }
 
       if (trainTimeLabel) {
         trainTimeLabel.textContent =
@@ -169,8 +204,12 @@ export function createUIController({
 
   // --- Button wiring ---
 
-  if (trainBtn) {
-    trainBtn.addEventListener('click', () => {
+  const meleeBtn = trainMeleeBtn || trainBtn;
+  const rangedBtn = trainRangedBtn;
+
+  // Melee / gatherer button
+  if (meleeBtn) {
+    meleeBtn.addEventListener('click', () => {
       const scraps = getScraps();
       const selectedBarracks = getSelectedBarracks();
       const anyBarracksSelected = !!selectedBarracks;
@@ -230,6 +269,7 @@ export function createUIController({
         refreshResources();
         b.training = true;
         b.trainingTime = 0;
+        b.trainingType = 'melee'; // NEW: track what we’re building
 
         console.log(`Barracks started training melee (cost ${MELEE_COST}).`);
         refreshUI();
@@ -240,11 +280,55 @@ export function createUIController({
     });
   }
 
+  // Ranged button
+  if (rangedBtn) {
+    rangedBtn.addEventListener('click', () => {
+      const scraps = getScraps();
+      const selectedBarracks = getSelectedBarracks();
+      const anyBarracksSelected = !!selectedBarracks;
+
+      if (!anyBarracksSelected) {
+        return;
+      }
+
+      const b = selectedBarracks;
+      const ownerId = b.ownerId;
+      const cap = getPopulationCap(ownerId);
+      if (getPlayerUnitCount(ownerId) >= cap) {
+        console.log(`Unit cap reached (${cap}) for player ${ownerId}.`);
+        return;
+      }
+
+      if (b.training) {
+        console.log('Barracks already training a unit.');
+        return;
+      }
+      if (scraps < RANGED_COST) {
+        console.log(
+          `Not enough Scraps for ranged. Need ${RANGED_COST}, have ${scraps}.`
+        );
+        return;
+      }
+
+      setScraps(scraps - RANGED_COST);
+      refreshResources();
+      b.training = true;
+      b.trainingTime = 0;
+      b.trainingType = 'ranged'; // NEW: identify build type
+
+      console.log(`Barracks started training ranged (cost ${RANGED_COST}).`);
+      refreshUI();
+    });
+  }
+
   if (buildBarracksBtn) {
     buildBarracksBtn.addEventListener('click', () => {
       const scraps = getScraps();
       const builder = units.find(u => u.selected && u.role === 'gatherer');
-      if (!builder) return;
+      if (!builder) {
+        console.log('No gatherer selected to build barracks.');
+        return;
+      }
 
       if (scraps < BARRACKS_COST) {
         console.log(
@@ -256,9 +340,16 @@ export function createUIController({
       setScraps(scraps - BARRACKS_COST);
       refreshResources();
 
-      // Construction mode will be handled by main.js / construction system
-      // We just flip the state flags; main.js owns constructionState.
-      // This function does not know constructionState directly by design.
+      // ENTER PLACING MODE
+      constructionState.mode = 'placing';
+      constructionState.builder = builder;
+      constructionState.preview = null;
+      constructionState.ghost = null;
+      constructionState.buildTimer = 0;
+      constructionState.completed = false;
+
+      console.log('Entered barracks placement mode. Left-click to place ghost.');
+      refreshUI();
     });
   }
 

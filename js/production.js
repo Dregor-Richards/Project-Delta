@@ -17,51 +17,57 @@ export function updateProduction({
     barracksList,
     spawnUnitFromBuilding,
     refreshUI,
+    getPlayerUnitCount,
+    getPopulationCap,
 }) {
     // --- Refinery training (gatherers) ---
     if (refinery.training) {
-        refinery.trainingTime += dt;
-        if (refinery.trainingTime >= refinery.trainingDuration) {
-            refinery.training = false;
-            refinery.trainingTime = 0;
+    refinery.trainingTime += dt;
+    if (refinery.trainingTime >= refinery.trainingDuration) {
+        refinery.training = false;
+        refinery.trainingTime = 0;
 
-            if (getPlayerUnitCount(refinery.ownerId) < POP_CAP) {
-                // Refinery always produces 'gatherer'
-                spawnUnitFromBuilding('gatherer', refinery);
-            } else {
-                console.log('Refinery finished, but unit cap reached (10).');
-            }
-
-            refreshUI();
+        const ownerId = refinery.ownerId;
+        const cap = getPopulationCap(ownerId);
+        if (getPlayerUnitCount(ownerId) < cap) {
+        // Refinery always produces 'gatherer'
+        spawnUnitFromBuilding('gatherer', refinery);
         } else {
-            // Still training, update progress bar/UI
-            refreshUI();
+        console.log(`Refinery finished, but unit cap reached (${cap}).`);
         }
+
+        refreshUI();
+    } else {
+        refreshUI();
+    }
     }
 
     // --- Barracks training (melee) ---
     if (!barracksList) return;
 
     for (const b of barracksList) {
-        if (!b.training) continue;
+    if (!b.training) continue;
 
-        b.trainingTime += dt;
+    b.trainingTime += dt;
 
-        if (b.trainingTime >= b.trainingDuration) {
-            b.training = false;
-            b.trainingTime = 0;
+    if (b.trainingTime >= b.trainingDuration) {
+        b.training = false;
+        b.trainingTime = 0;
 
-            if (getPlayerUnitCount(b.ownerId) < POP_CAP) {
-                // For now, barracks always produce 'melee'
-                spawnUnitFromBuilding('melee', b);
-            } else {
-                console.log('Barracks finished, but unit cap reached (10).');
-            }
-
-            refreshUI();
+        const ownerId = b.ownerId;
+        const cap = getPopulationCap(ownerId);
+        if (getPlayerUnitCount(ownerId) < cap) {
+        // Use the trainingType set by the UI: 'melee' or 'ranged'
+        const unitType = b.trainingType || 'melee';
+        spawnUnitFromBuilding(unitType, b);
         } else {
-            // Still training, update UI if barracks is selected
-            refreshUI();
+        console.log(`Barracks finished, but unit cap reached (${cap}).`);
         }
+
+        b.trainingType = null;
+        refreshUI();
+    } else {
+        refreshUI();
+    }
     }
 }

@@ -27,6 +27,17 @@ const UNIT_TEMPLATES = {
         maxCarry: 5,
         designFaction: 'Malachordith',
     },
+    'malachordith_ranged': {
+        type: 'ranged',
+        role: 'ranged',
+        hp: 80,
+        maxHp: 80,
+        attackDamage: 16,    // slow, heavy
+        attackInterval: 1.6,
+        attackRange: 120,
+        maxCarry: 5,
+        designFaction: 'Malachordith',
+    },
 
 // -----   Foldari Units   -----
     'foldari_gatherer': {
@@ -51,6 +62,17 @@ const UNIT_TEMPLATES = {
         maxCarry: 5,
         designFaction: 'Foldari',
     },
+    'foldari_ranged': {
+        type: 'ranged',
+        role: 'ranged',
+        hp: 80,
+        maxHp: 80,
+        attackDamage: 10,    // mid, mid
+        attackInterval: 1.0,
+        attackRange: 120,
+        maxCarry: 5,
+        designFaction: 'Foldari',
+    },
 
 // -----   Shiervale Units   -----
     'shiervale_gatherer': {
@@ -72,6 +94,17 @@ const UNIT_TEMPLATES = {
         attackDamage: 13,
         attackInterval: 1.0,
         attackRange: 25,
+        maxCarry: 5,
+        designFaction: 'Shiervale',
+    },
+    'shiervale_ranged': {
+        type: 'ranged',
+        role: 'ranged',
+        hp: 80,
+        maxHp: 80,
+        attackDamage: 7,     // fast, light
+        attackInterval: 0.7,
+        attackRange: 120,
         maxCarry: 5,
         designFaction: 'Shiervale',
     },

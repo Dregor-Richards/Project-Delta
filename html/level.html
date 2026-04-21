@@ -40,17 +40,31 @@
     <div class="game-wrapper">
         <canvas id="gameCanvas" width="1100" height="650"></canvas>
 
-        <div id="ui-panel">
-        <div id="building-ui" class="ui-section hidden">
-        <button id="train-unit-btn">Train Unit</button>
-        <button id="build-barracks-btn" class="hidden">Build Barracks</button>
-        <div id="train-info">
-            <span id="train-time-label"></span>
-        </div>
+    <div id="ui-panel">
+    <div id="building-ui" class="ui-section hidden">
+        <!-- Build Barracks -->
+        <button id="build-barracks-btn" class="hidden">
+        Build Barracks
+        </button>
+
+        <!-- Train Melee -->
+        <button id="train-melee-btn" class="hidden">
+        Train Melee
+        </button>
+
+        <!-- Train Ranged -->
+        <button id="train-ranged-btn" class="hidden">
+        Train Ranged
+        </button>
+
         <div id="train-progress" class="progress hidden">
-            <div id="train-progress-fill"></div>
+        <div id="train-progress-fill"></div>
         </div>
+        <div id="train-info">
+        <span id="train-time-label"></span>
         </div>
+    </div>
+    </div>
         </div>
     </div>
 

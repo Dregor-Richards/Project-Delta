@@ -1,6 +1,10 @@
 import { createCamera } from './camera.js';
 import { updateGameState } from './gameUpdate.js';
 import { createMap1 } from './map1.js';
+// Later:
+// import { createMap2 } from './map2.js';
+// import { createMap3 } from './map3.js';
+// import { createMap4 } from './map4.js';
 import { createUnitForPlayer } from './unitTemplates.js';
 import { createBuildingFromTemplate } from './buildingTemplates.js';
 import { CONTINENT_UNIT_KEYS } from './factions.js';
@@ -32,6 +36,11 @@ import {
 } from './gameHelpers.js';
 import { createUIController } from './uiController.js';
 import { createInputController } from './input.js';
+import {
+    getPlayerUnitCount as getPlayerUnitCountFromModule,
+    getPopulationCap as getPopulationCapFromModule,
+    createSpawnUnitFromBuilding,
+} from './population.js';
 
 window.addEventListener('DOMContentLoaded', () => {
     console.log('Delta main.js DOMContentLoaded hook running');
@@ -39,6 +48,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const LOCAL_PLAYER_ID = 1;
     const ENEMY_PLAYER_ID = 2;
 
+    const storedMapId = localStorage.getItem('moa_mapId') || 'map1';
     const storedFaction = localStorage.getItem('moa_playerFaction') || 'Foldari';
     const storedAiCount = parseInt(localStorage.getItem('moa_aiCount') || '1', 10);
 
@@ -54,6 +64,65 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const ctx = canvas.getContext('2d');
 
+        // --- Cost table (centralized) ---
+    const UNIT_COSTS = {
+        // Units
+        gatherer: 25,       // generic gatherer cost
+        melee: 50,          // generic melee cost (baseline)
+        ranged: 75,         // generic ranged cost
+        // Buildings
+        barracks: 100,
+        refinery: 500,
+    };
+
+    // Derive the legacy constants from UNIT_COSTS so UI stays the same API for now
+    const MELEE_COST = UNIT_COSTS.melee;
+    const RANGED_COST = UNIT_COSTS.ranged;
+    const GATHERER_COST = UNIT_COSTS.gatherer;
+    const BARRACKS_COST = UNIT_COSTS.barracks;
+    const REFINERY_COST = UNIT_COSTS.refinery;
+
+    const REFINERY_SUPPLY = 15;
+    let scraps = 25; // starting amount
+
+    // --- Map selection helper ---
+    function createSelectedMap({
+        mapId,
+        canvas,
+        localPlayerId,
+        enemyPlayerId,
+        localFaction,
+        enemyFaction,
+    }) {
+    switch (mapId) {
+        case 'map1':
+        return createMap1({
+            canvas,
+            localPlayerId,
+            enemyPlayerId,
+            localFaction,
+            enemyFaction,
+        });
+
+        // case 'map2':
+        //   return createMap2({ canvas, localPlayerId, enemyPlayerId, localFaction, enemyFaction });
+        // case 'map3':
+        //   return createMap3({ canvas, localPlayerId, enemyPlayerId, localFaction, enemyFaction });
+        // case 'map4':
+        //   return createMap4({ canvas, localPlayerId, enemyPlayerId, localFaction, enemyFaction });
+
+        default:
+        console.warn(`Unknown mapId '${mapId}', falling back to map1.`);
+        return createMap1({
+            canvas,
+            localPlayerId,
+            enemyPlayerId,
+            localFaction,
+            enemyFaction,
+        });
+    }
+    }
+
     // --- Map-specific starting state ---
     const {
         copperNodes,
@@ -62,9 +131,10 @@ window.addEventListener('DOMContentLoaded', () => {
         barracksList,
         refinery,
         enemyRefinery,
-        worldWidth = canvas.width,   // TEMP fallback
-        worldHeight = canvas.height, // TEMP fallback
-    } = createMap1({
+        worldWidth = canvas.width,    // TEMP fallback
+        worldHeight = canvas.height,  // TEMP fallback
+    } = createSelectedMap({
+        mapId: storedMapId,
         canvas,
         localPlayerId: LOCAL_PLAYER_ID,
         enemyPlayerId: ENEMY_PLAYER_ID,
@@ -85,6 +155,27 @@ window.addEventListener('DOMContentLoaded', () => {
         edgeSpeedMultiplier: 1.0,
     });
 
+    // Focus camera on a world position, clamped to map bounds
+    function focusCameraOn(x, y) {
+        camera.x = x - (camera.viewWidth  / (2 * camera.zoom));
+        camera.y = y - (camera.viewHeight / (2 * camera.zoom));
+        camera.clamp();
+    }
+
+    // Initial focus: the local player's refinery
+    focusCameraOn(refinery.x, refinery.y);
+
+    // Hotkey: Space refocuses camera on base (local player's refinery)
+    window.addEventListener('keydown', (e) => {
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+            return;
+        }
+        if (e.code === 'Space') {
+            e.preventDefault();
+            focusCameraOn(refinery.x, refinery.y);
+        }
+    });
+
     const scrapsAmountEl = document.getElementById('scraps-amount');
     const popAmountEl = document.getElementById('pop-amount');
     const popCapEl = document.getElementById('pop-cap');
@@ -93,16 +184,11 @@ window.addEventListener('DOMContentLoaded', () => {
     const buildBarracksBtn = document.getElementById('build-barracks-btn');
     const buildingUi = document.getElementById('building-ui');
     const trainBtn = document.getElementById('train-unit-btn');
+    const trainMeleeBtn = document.getElementById('train-melee-btn');
+    const trainRangedBtn = document.getElementById('train-ranged-btn');
     const trainProgress = document.getElementById('train-progress');
     const trainProgressFill = document.getElementById('train-progress-fill');
     const trainTimeLabel = document.getElementById('train-time-label');
-
-    const MELEE_COST = 50;
-    const GATHERER_COST = 25;
-    const BARRACKS_COST = 100;
-    const REFINERY_COST = 500;
-    const REFINERY_SUPPLY = 15;
-    let scraps = 25; // starting amount
 
     // Construction state
     let constructionState = {
@@ -119,9 +205,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // --- Game-level helpers that still live in main ---
 
+        // --- Population wiring (using population.js) ---
+
+    // Adapter: count units for a given owner via population.js
     function getPlayerUnitCount(ownerId) {
-        return units.filter(u => u.ownerId === ownerId).length;
+        return getPlayerUnitCountFromModule(units, ownerId);
     }
+
+    // Adapter: get population cap for a given player via population.js
+    function getPopulationCap(playerId) {
+        return getPopulationCapFromModule({
+            playerId,
+            refinery,
+            enemyRefinery,
+            REFINERY_SUPPLY,
+        });
+    }
+
+    // Bound spawn function using population.js
+    const spawnUnitFromBuilding = createSpawnUnitFromBuilding({
+        units,
+        refinery,
+        enemyRefinery,
+        REFINERY_SUPPLY,
+        onPopulationChanged: () => ui.refreshPopulation(),
+    });
 
     function getSelectedUnits() {
         return units.filter((u) => u.selected);
@@ -129,67 +237,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
     function getSelectedBarracks() {
         return barracksList.find(b => b.selected) || null;
-    }
-
-    function getPopulationCap(playerId) {
-        let cap = 0;
-
-        if (refinery && refinery.ownerId === playerId && !refinery.destroyed) {
-            cap += REFINERY_SUPPLY;
-        }
-        if (enemyRefinery && enemyRefinery.ownerId === playerId && !enemyRefinery.destroyed) {
-            cap += REFINERY_SUPPLY;
-        }
-
-        return cap;
-    }
-
-    function spawnUnitFromBuilding(type, building) {
-        const ownerId = building.ownerId;
-        const ownerUnitCount = getPlayerUnitCount(ownerId);
-        const cap = getPopulationCap(ownerId);
-
-        if (ownerUnitCount >= cap) {
-            console.log(`Unit cap reached (${cap}) for player ${ownerId}.`);
-            return null;
-        }
-
-        const owner = getPlayerById(ownerId);
-        if (!owner) {
-            console.warn(`No player found for ownerId ${ownerId}`);
-            return null;
-        }
-
-        const factionUnits = CONTINENT_UNIT_KEYS[owner.faction];
-        const templateKey = factionUnits?.[type];
-        if (!templateKey) {
-            console.warn(
-                `No unit template for type '${type}' and faction '${owner.faction}'`
-            );
-            return null;
-        }
-
-        const spawnOffsetX = 50 + Math.random() * 20;
-        const spawnOffsetY = (Math.random() - 0.5) * 30;
-        const spawnX = building.x + spawnOffsetX;
-        const spawnY = building.y + spawnOffsetY;
-
-        const unit = createUnitForPlayer(templateKey, ownerId, {
-            x: spawnX,
-            y: spawnY,
-            tx: building.rallyX,
-            ty: building.rallyY,
-            moving: true,
-        });
-
-        units.push(unit);
-
-        console.log(
-            `Spawned ${type} (${templateKey}) for player ${ownerId} from building. Total units for this player: ${getPlayerUnitCount(ownerId)}`
-        );
-
-        ui.refreshPopulation();
-        return unit;
     }
 
     // --- Scraps accessors for UI controller ---
@@ -220,7 +267,11 @@ window.addEventListener('DOMContentLoaded', () => {
         popCapEl,
         buildBarracksBtn,
         buildingUi,
+        // Old single button:
         trainBtn,
+        // New buttons:
+        trainMeleeBtn,
+        trainRangedBtn,
         trainProgress,
         trainProgressFill,
         trainTimeLabel,
@@ -228,6 +279,7 @@ window.addEventListener('DOMContentLoaded', () => {
         barracksList,
         refinery,
         MELEE_COST,
+        RANGED_COST,
         GATHERER_COST,
         BARRACKS_COST,
         getPlayerUnitCount,
@@ -318,22 +370,36 @@ window.addEventListener('DOMContentLoaded', () => {
 
         // Real barracks
         for (const b of barracksList) {
-            const s = camera.worldToScreen(b.x, b.y);
-            drawBarracks(ctx, { ...b, x: s.x, y: s.y });
-            if (b.selected) {
-                drawRallyPoint(ctx, {
-                    ...b,
-                    x: s.x,
-                    y: s.y,
-                });
-            }
+        const s = camera.worldToScreen(b.x, b.y);
+        const rallyScreen = camera.worldToScreen(b.rallyX, b.rallyY);
+
+        drawBarracks(ctx, { ...b, x: s.x, y: s.y });
+
+        if (b.selected) {
+            drawRallyPoint(ctx, {
+            ...b,
+            x: s.x,
+            y: s.y,
+            rallyX: rallyScreen.x,
+            rallyY: rallyScreen.y,
+            });
+        }
         }
 
         // Refinery
         const refScreen = camera.worldToScreen(refinery.x, refinery.y);
+        const refRallyScreen = camera.worldToScreen(refinery.rallyX, refinery.rallyY);
+
         drawRefinery(ctx, { ...refinery, x: refScreen.x, y: refScreen.y });
+
         if (refinery.selected) {
-            drawRallyPoint(ctx, { ...refinery, x: refScreen.x, y: refScreen.y });
+        drawRallyPoint(ctx, {
+            ...refinery,
+            x: refScreen.x,
+            y: refScreen.y,
+            rallyX: refRallyScreen.x,
+            rallyY: refRallyScreen.y,
+        });
         }
 
         const enemyRefScreen = camera.worldToScreen(enemyRefinery.x, enemyRefinery.y);
@@ -371,6 +437,9 @@ window.addEventListener('DOMContentLoaded', () => {
             spawnUnitFromBuilding,
             constructionState,
             barracksList,
+            getPlayerUnitCount,
+            getPopulationCap, 
+            refreshPopulation: ui.refreshPopulation,
         });
 
         if (result && typeof result.scraps === 'number') {

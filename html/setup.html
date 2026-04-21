@@ -12,26 +12,26 @@
 
     <!-- Faction selection -->
     <div class="setup-section">
-    <h2>Faction</h2>
-    <div class="faction-grid">
+      <h2>Faction</h2>
+      <div class="faction-grid">
         <!-- Malachordith: disabled for now, first -->
         <div class="faction-card disabled" data-faction="Malachordith" id="faction-malachordith">
-        <h3>Malachordith</h3>
-        <p>Coming soon.</p>
+          <h3>Malachordith</h3>
+          <p>Coming soon.</p>
         </div>
 
         <!-- Foldari: enabled, middle -->
         <div class="faction-card" data-faction="Foldari" id="faction-foldari">
-        <h3>Foldari</h3>
-        <p>Hardened mercenaries. Reliable fronts, solid economy.</p>
+          <h3>Foldari</h3>
+          <p>Hardened mercenaries. Reliable fronts, solid economy.</p>
         </div>
 
         <!-- Shiervale: disabled, last -->
         <div class="faction-card disabled" data-faction="Shiervale" id="faction-shiervale">
-        <h3>Shiervale</h3>
-        <p>Coming soon.</p>
+          <h3>Shiervale</h3>
+          <p>Coming soon.</p>
         </div>
-    </div>
+      </div>
     </div>
 
     <!-- AI enemies selection -->
@@ -47,49 +47,76 @@
       </div>
     </div>
 
+    <!-- Map selection -->
+    <div class="setup-section">
+      <h2>Map</h2>
+      <div class="setup-row">
+        <span id="selected-map-label">Current Map: Map 1 – Copper Fields</span>
+        <button id="choose-map-btn" type="button">Choose Map…</button>
+      </div>
+    </div>
+
     <!-- Start button -->
     <div class="setup-footer">
       <button id="start-game-btn" disabled>Start Battle</button>
     </div>
   </div>
 
-  <script>
-    const factionCards = document.querySelectorAll('.faction-card');
-    const startBtn = document.getElementById('start-game-btn');
-    const aiSelect = document.getElementById('ai-count');
+  <!-- Map selection modal -->
+  <div id="map-modal-overlay" class="map-modal-overlay" hidden>
+    <div class="map-modal">
+      <div class="map-modal-header">
+        <h2>Choose a Map</h2>
+        <button id="map-modal-close" type="button" aria-label="Close map selection">×</button>
+      </div>
+      <div class="map-modal-body">
+        <div class="map-grid">
+          <!-- Map 1: real map -->
+          <button class="map-card" data-map-id="map1">
+            <div class="map-thumb"></div>
+            <h3>Fields Of Crystil</h3>
+            <p>Open fields and corner bases. 1v1 starts in the far corners from one another, with farmer quests about the center.</p>
+          </button>
 
-    let selectedFaction = null;
+          <!-- Placeholders -->
+          <button class="map-card disabled" data-map-id="map2" disabled>
+            <div class="map-thumb"></div>
+            <h3>Institution Of Prismworth</h3>
+            <p>Four valley bases, with immediate access to surrounding swampland. Control of the center provides ample quests and trade opportunities.</p>
+          </button>
 
-    factionCards.forEach(card => {
-      card.addEventListener('click', () => {
-        if (card.classList.contains('disabled')) {
-          return; // ignore clicks on disabled factions
-        }
+          <button class="map-card disabled" data-map-id="map3" disabled>
+            <div class="map-thumb"></div>
+            <h3>Meeklan Shores</h3>
+            <p>Deep forested shore, with hidden quests and chokepoints, scattered spawn points. Across the waters, islands and rare quests await.</p>
+          </button>
 
-        // Clear previous selection
-        factionCards.forEach(c => c.classList.remove('selected'));
+          <button class="map-card disabled" data-map-id="map4" disabled>
+            <div class="map-thumb"></div>
+            <h3>Kord Canyons</h3>
+            <p>Team map; each team shares an open starting area, divided from the enemy team by a trio of canyons. Control of the canyons is essential.</p>
+          </button>
 
-        // Mark this one selected
-        card.classList.add('selected');
-        selectedFaction = card.dataset.faction;
+          <button class="map-card disabled" data-map-id="map5" disabled>
+            <div class="map-thumb"></div>
+            <h3>Map 5 – Coming Soon</h3>
+            <p>Placeholder for a future battlefield.</p>
+          </button>
 
-        // Enable Start button once a valid faction is chosen
-        startBtn.disabled = !selectedFaction;
-      });
-    });
+          <button class="map-card disabled" data-map-id="map6" disabled>
+            <div class="map-thumb"></div>
+            <h3>Map 6 – Coming Soon</h3>
+            <p>Placeholder for a future battlefield.</p>
+          </button>
+        </div>
+      </div>
+      <div class="map-modal-footer">
+        <button id="map-modal-cancel" type="button">Close</button>
+      </div>
+    </div>
+  </div>
 
-    startBtn.addEventListener('click', () => {
-      if (!selectedFaction) return;
-
-      const aiCount = parseInt(aiSelect.value, 10) || 1;
-
-      // Persist setup choices for level.html
-      localStorage.setItem('moa_playerFaction', selectedFaction);
-      localStorage.setItem('moa_aiCount', String(aiCount));
-
-      // Go to the level
-      window.location.href = 'level.html';
-    });
-  </script>
+  <script src="../js/setup.js"></script>
+  
 </body>
 </html>

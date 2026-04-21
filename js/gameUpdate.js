@@ -22,6 +22,9 @@ export function updateGameState({
     spawnUnitFromBuilding,
     constructionState,
     barracksList,
+    getPlayerUnitCount,
+    getPopulationCap,
+    refreshPopulation,
 }) {
     // --- Movement system ---
     updateMovement({
@@ -52,6 +55,7 @@ export function updateGameState({
         dt,
         units,
         findClosestEnemyInRange,
+        refreshPopulation,
     });
 
     // --- Production system (buildings training units) ---
@@ -62,6 +66,8 @@ export function updateGameState({
         barracksList,
         spawnUnitFromBuilding,
         refreshUI,
+        getPlayerUnitCount,
+        getPopulationCap,
     });
 
     // --- Simple construction system (gatherer building barracks) ---

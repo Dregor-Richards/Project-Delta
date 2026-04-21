@@ -1,6 +1,20 @@
-Add on setup page, modal to pick map (Only 1 right now)
 Fog Of War!
-Finish Population.js
+Can only build 1 building at a time right now!!
+Timer
+
+Hotkeys:
+Ctrl + 1–9: assign current selection to group.
+1–9: recall group (select units in that group).
+Shift + 1–9: add current selection to group (optional v1).
+Double‑tap 1–9: snap camera to that group (maybe later).
+Select all military units (global or on‑screen).
+Select idle worker (cycle) — classic key is F1 in StarCraft.
+Attack‑move hotkey (almost always A in RTS).
+Stop (often S).
+Hold position (often H).
+Patrol (often P, maybe later).
+Refocus on base (you suggested this—good call).
+Bind Q/W/E/R or a grid to “Train melee”, “Train worker”, “Build barracks”, etc.
 
 --- 04/20 ---
  - Make gatherers Fight Back When Attacked
@@ -28,7 +42,6 @@ Finish Population.js
  - Pause & Time Adjust
  - Restart Level button
 --- 04/28 ---
- - First Map (Template)
  - Basic Win/Loss Conditions
 --- 04/29 ---
  - Select Noise
@@ -71,6 +84,14 @@ Finish Population.js
 worth your time...
 ---------------------------
 
+-----   Campaign Idea #1   -----
+Tailon Glimmersmith, and his journey from the Institution to make the thousand Prisms.
+--------------------------------
+
+-----   Campaign Idea #2   -----
+"Over The Hills & Far Away"
+--------------------------------
+
  - Add Secondary "Rare" Resource
  - Add Third "Craftable" Resource
  - Upgrades (& An Upgrade Building Or 2)
@@ -80,6 +101,7 @@ Melee Unit - Strong Health, Low Attack / Mid Healt & Attac / Low Healt, Strong A
     = HP, DMG, SPD: 80, 10, 1 / 100, 8, 1 / 60, 13, 1
 Ranged Unit - Slow Fire, Heavy Damage / Mid & Mid / Fast FIre, Low Damage
 Scout Unit - Cluster of smalls / cloaked / Fast
+Cheap - Banner / ??? / Bomb
 AOE Unit - Ground Pound / Laser Blast / Pillars Of Fire
 Pinnacle Building - Military & Upgrade Elite / Wizard Tower For Spells / Economic ?? (Generate Resources)
 

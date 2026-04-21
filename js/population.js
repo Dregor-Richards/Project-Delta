@@ -4,7 +4,7 @@
 import { CONTINENT_UNIT_KEYS } from './factions.js';
 import { createUnitForPlayer } from './unitTemplates.js';
 import { getPlayerById } from './players.js';
-import { getUnitRadius } from './gameHelpers.js';
+import { getUnitRadius } from './gameHelpers.js'; // currently unused, but handy later
 
 export function getPlayerUnitCount(units, ownerId) {
   return units.filter(u => u.ownerId === ownerId).length;
