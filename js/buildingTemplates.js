@@ -8,6 +8,7 @@ const BUILDING_TEMPLATES = {
     maxHp: 1000,
     size: 70,
     trainingDuration: 3,
+    visionRange: 320,
   },
   'foldari_barracks': {
     type: 'barracks',
@@ -16,6 +17,7 @@ const BUILDING_TEMPLATES = {
     height: 60,
     topInset: 20,
     trainingDuration: 5,
+    visionRange: 320,
   },
 
   // ----- Malachordith Buildings -----
@@ -24,6 +26,7 @@ const BUILDING_TEMPLATES = {
     maxHp: 1000,
     size: 70,
     trainingDuration: 3,
+    visionRange: 320,
   },
   'malachordith_barracks': {
     type: 'barracks',
@@ -32,6 +35,7 @@ const BUILDING_TEMPLATES = {
     height: 60,
     topInset: 20,
     trainingDuration: 5,
+    visionRange: 320,
   },
 
   // ----- Shiervale Buildings -----
@@ -40,6 +44,7 @@ const BUILDING_TEMPLATES = {
     maxHp: 1000,
     size: 70,
     trainingDuration: 3,
+    visionRange: 320,
   },
   'shiervale_barracks': {
     type: 'barracks',
@@ -48,6 +53,7 @@ const BUILDING_TEMPLATES = {
     height: 60,
     topInset: 20,
     trainingDuration: 5,
+    visionRange: 320,
   },
 };
 
