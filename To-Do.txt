@@ -1,6 +1,17 @@
-Fog Of War!
-Can only build 1 building at a time right now!!
 Timer
+
+Alright. So I'm not entirely sure how the larger RTS games handle their AI, but I assume they have a large set of 
+"If this, do this" conditionals to determine the choices they make 
+(While adding something to make them at least seem natural in flow).
+For our starting AI here, now that they gather, I want them to spend resources when they have enough, 
+to train additional gatherers, until they have a standing group of 6 gathering 
+(From what I've seen from my own gatherers, they tend to get in each others way if more than 3 gather a single node, 
+so if possible, we may want to account for that). Then, once they gather enough, they should have one 
+break away and start building a barracks (It would be helpful, but not crucial, 
+to have the ghost building visible for the player). That gatherer should then return to the resource gathering, 
+and the AI should train a standing army of 3 melee and 3 ranged units (Covering all of the melee first, then the ranged). 
+Once they've trained this, I want them to march that army over to the player's base to attack their units.
+We don't have time for this now, but I'd love an idea of how this might play out in the code!
 
 Hotkeys:
 Ctrl + 1–9: assign current selection to group.

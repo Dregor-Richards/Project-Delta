@@ -1,5 +1,6 @@
-// input.js
 // Centralizes canvas mouse input, selection, and commands.
+
+const LOCAL_PLAYER_ID = 1;
 
 export function createInputController({
   canvas,
@@ -17,6 +18,7 @@ export function createInputController({
   isPointInRefinery,
   isPointInBarracks,
   refreshUI,
+  startConstructionJob,
 }) {
   const dragStart = { x: 0, y: 0 };
   const dragEnd = { x: 0, y: 0 };
@@ -42,36 +44,33 @@ export function createInputController({
   canvas.addEventListener('mousedown', (e) => {
     const pos = screenToWorldPos(e.clientX, e.clientY);
 
-    if (e.button === 0) {
-      // PLACEMENT CLICK
-      if (constructionState.mode === 'placing') {
-        const width = 80;
-        const height = 60;
-        const topInset = 20;
+  if (e.button === 0) {
+    // PLACEMENT CLICK
+    if (constructionState.mode === 'placing') {
+      // Decide which unit is the builder:
+      // simplification: first selected unit, or specifically a gatherer
+      const selectedUnits = getSelectedUnits();
+      const builder = selectedUnits.find(u => u.role === 'gatherer') || selectedUnits[0];
 
-        constructionState.ghost = {
-          x: pos.x,
-          y: pos.y,
-          width,
-          height,
-          topInset,
-        };
-
+      if (!builder) {
+        console.log('No builder selected; cannot start construction.');
+        constructionState.mode = 'idle';
         constructionState.preview = null;
-        constructionState.mode = 'building';
-        constructionState.buildTimer = 0;
-
-        if (constructionState.builder) {
-          const b = constructionState.builder;
-          b.tx = pos.x;
-          b.ty = pos.y + height * 0.3;
-          b.moving = true;
-          b.mode = 'building';
-        }
-
-        console.log('Placed barracks ghost at', pos.x, pos.y);
         return;
       }
+
+      startConstructionJob({
+        x: pos.x,
+        y: pos.y,
+        builder,
+      });
+
+      constructionState.preview = null;
+      constructionState.mode = 'idle';
+
+      console.log('Placed barracks ghost at', pos.x, pos.y);
+      return;
+    }
 
       let somethingSelected = false;
 
@@ -99,12 +98,13 @@ export function createInputController({
         isDragging = false;
       } else {
         let clickedUnit = null;
-        for (const u of units) {
-          if (isPointInUnit(pos.x, pos.y, u)) {
-            clickedUnit = u;
-            break;
-          }
+      for (const u of units) {
+        if (u.ownerId !== LOCAL_PLAYER_ID) continue;
+        if (isPointInUnit(pos.x, pos.y, u)) {
+          clickedUnit = u;
+          break;
         }
+      }
         if (clickedUnit) {
           refinery.selected = false;
           barracksList.forEach(b => (b.selected = false));

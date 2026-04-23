@@ -5,6 +5,7 @@ import { createMap1 } from './map1.js';
 // import { createMap2 } from './map2.js';
 // import { createMap3 } from './map3.js';
 // import { createMap4 } from './map4.js';
+import { createFogOfWar, FOG_UNEXPLORED, FOG_EXPLORED, FOG_VISIBLE } from './fogOfWar.js';
 import { createUnitForPlayer } from './unitTemplates.js';
 import { createBuildingFromTemplate } from './buildingTemplates.js';
 import { CONTINENT_UNIT_KEYS } from './factions.js';
@@ -84,6 +85,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const REFINERY_SUPPLY = 15;
     let scraps = 25; // starting amount
+    let enemyScraps = 25;
 
     // --- Map selection helper ---
     function createSelectedMap({
@@ -142,6 +144,12 @@ window.addEventListener('DOMContentLoaded', () => {
         enemyFaction: ENEMY_FACTION,
     });
 
+    const fog = createFogOfWar({
+        worldWidth,
+        worldHeight,
+        cellSize: 40, // matches gridSize in drawGrid
+    });
+
     // --- Camera (initialized after we know world size) ---
     const camera = createCamera({
         x: 0,
@@ -190,18 +198,78 @@ window.addEventListener('DOMContentLoaded', () => {
     const trainProgressFill = document.getElementById('train-progress-fill');
     const trainTimeLabel = document.getElementById('train-time-label');
 
-    // Construction state
+    // Construction system
     let constructionState = {
-        mode: 'idle',      // 'idle' | 'placing' | 'building'
-        ghost: null,       // finalized placement (during building)
-        builder: null,
-        buildTimer: 0,
-        buildDuration: 45,
-        completed: false,
-        preview: null,     // follows mouse while placing
+        mode: 'idle',     // 'idle' | 'placing'
+        preview: null,    // follows mouse while placing
     };
+    let constructionJobs = []; // array of active builds
 
     let lastTime = 0;
+
+    function startConstructionJob({ x, y, builder }) {
+        const width = 80;
+        const height = 60;
+        const topInset = 20;
+
+        const ghost = { x, y, width, height, topInset };
+
+        const job = {
+            id: Date.now() + Math.random(),
+            ghost,
+            builder,
+            buildTimer: 0,
+            buildDuration: 45,
+            completed: false,
+        };
+
+        constructionJobs.push(job);
+
+        // send builder toward site
+        if (builder) {
+            builder.tx = x;
+            builder.ty = y + height * 0.3;
+            builder.moving = true;
+            builder.mode = 'building';
+        }
+        }
+
+    function updateConstructionJobs(dt) {
+    for (const job of constructionJobs) {
+        if (job.completed) continue;
+
+        job.buildTimer += dt;
+        if (job.buildTimer >= job.buildDuration) {
+        job.completed = true;
+
+        const { ghost, builder } = job;
+
+        const barracks = createBuildingFromTemplate('foldari_barracks', {
+            x: ghost.x,
+            y: ghost.y,
+            rallyX: ghost.x + 100,
+            rallyY: ghost.y,
+            ownerId: builder.ownerId,
+        });
+
+        if (barracks) {
+            barracksList.push(barracks);
+            console.log('Barracks added to barracksList; total:', barracksList.length);
+        }
+
+        const safeOffset = (barracks?.height || 60) / 2 + getUnitRadius(builder) + 5;
+        builder.x = ghost.x;
+        builder.y = ghost.y + safeOffset;
+        builder.tx = builder.x;
+        builder.ty = builder.y;
+        builder.moving = false;
+        builder.mode = 'idle';
+        }
+    }
+
+    // prune finished jobs
+    constructionJobs = constructionJobs.filter(job => !job.completed);
+    }
 
     // --- Game-level helpers that still live in main ---
 
@@ -307,6 +375,7 @@ window.addEventListener('DOMContentLoaded', () => {
         isPointInRefinery,
         isPointInBarracks,
         refreshUI: ui.refreshUI,
+        startConstructionJob,
     });
 
     function draw() {
@@ -351,21 +420,52 @@ window.addEventListener('DOMContentLoaded', () => {
             ctx.restore();
         }
 
-        // Fixed ghost while building
-        if (constructionState.ghost) {
-            const ghost = constructionState.ghost;
-            const s = camera.worldToScreen(ghost.x, ghost.y);
-            ctx.save();
-            ctx.globalAlpha = 0.4;
-            drawBarracks(ctx, {
-                x: s.x,
-                y: s.y,
-                width: ghost.width,
-                height: ghost.height,
-                topInset: ghost.topInset,
-                selected: false,
-            });
-            ctx.restore();
+        // Fixed ghosts while building (one per job)
+        for (const job of constructionJobs) {
+        if (job.completed) continue;
+        const ghost = job.ghost;
+        const s = camera.worldToScreen(ghost.x, ghost.y);
+
+        ctx.save();
+        ctx.globalAlpha = 0.4;
+        drawBarracks(ctx, {
+            x: s.x,
+            y: s.y,
+            width: ghost.width,
+            height: ghost.height,
+            topInset: ghost.topInset,
+            selected: false,
+        });
+        ctx.restore();
+
+        // --- Build progress bar ---
+        const progress = Math.max(0, Math.min(1, job.buildTimer / job.buildDuration));
+
+        const barWidth = ghost.width;
+        const barHeight = 6;
+
+        // Barracks bottom in screen space
+        const bottomY = s.y + ghost.height / 2;
+
+        const barX = s.x - barWidth / 2;
+        const topY = s.y - ghost.height / 2;
+        const barY = topY - 10; // 10px above roof
+
+        // Background
+        ctx.save();
+        ctx.globalAlpha = 0.9;
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx.fillRect(barX, barY, barWidth, barHeight);
+
+        // Filled portion
+        ctx.fillStyle = '#4caf50'; // green
+        ctx.fillRect(barX, barY, barWidth * progress, barHeight);
+
+        // Border
+        ctx.strokeStyle = 'rgba(0,0,0,0.9)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(barX, barY, barWidth, barHeight);
+        ctx.restore();
         }
 
         // Real barracks
@@ -406,9 +506,18 @@ window.addEventListener('DOMContentLoaded', () => {
         drawRefinery(ctx, { ...enemyRefinery, x: enemyRefScreen.x, y: enemyRefScreen.y });
 
         for (const u of units) {
+            // Example: only show enemies when fog is visible
+            if (u.ownerId !== LOCAL_PLAYER_ID) {
+                const fogState = fog.getStateAt(u.x, u.y);
+                if (fogState !== FOG_VISIBLE) {
+                    continue; // skip drawing this enemy
+                }
+            }
             const s = camera.worldToScreen(u.x, u.y);
             drawUnit(ctx, { ...u, x: s.x, y: s.y });
         }
+        
+        fog.draw(ctx, camera, canvas.width, canvas.height);
     }
 
     function loop(timestamp) {
@@ -422,11 +531,16 @@ window.addEventListener('DOMContentLoaded', () => {
             dt,
             units,
             refinery,
+            enemyRefinery,
             copperNodes,
+            enemyCopperNodes,
             scraps,
+            enemyScraps,
             getUnitRadius,
             gathererAtCopper: (u) => gathererAtCopper(u, copperNodes),
+            gathererAtEnemyCopper: (u) => gathererAtCopper(u, enemyCopperNodes),
             gathererAtRefinery: (u) => gathererAtRefinery(u, refinery),
+            gathererAtEnemyRefinery: (u) => gathererAtRefinery(u, enemyRefinery),
             separateUnitFromCopper: (u) => separateUnitFromCopper(u, copperNodes),
             separateUnits: () => separateUnits(units),
             unitCollidesWithRefinery: (u) => unitCollidesWithRefinery(u, refinery),
@@ -438,49 +552,29 @@ window.addEventListener('DOMContentLoaded', () => {
             constructionState,
             barracksList,
             getPlayerUnitCount,
-            getPopulationCap, 
+            getPopulationCap,
             refreshPopulation: ui.refreshPopulation,
         });
 
-        if (result && typeof result.scraps === 'number') {
-            scraps = result.scraps;
+        fog.updateVisibility({
+            units,
+            buildings: [...barracksList, refinery, enemyRefinery], // or just your vision‑granting buildings
+            localPlayerId: LOCAL_PLAYER_ID,
+            defaultUnitVision: 260,
+            defaultBuildingVision: 320,
+        });
+
+        if (result) {
+            if (typeof result.scraps === 'number') {
+                scraps = result.scraps;
+            }
+            if (typeof result.enemyScraps === 'number') {
+                enemyScraps = result.enemyScraps;
+            }
             ui.refreshResources();
         }
 
-        if (
-            constructionState.completed &&
-            constructionState.ghost &&
-            constructionState.builder
-        ) {
-            const ghost = constructionState.ghost;
-            const builder = constructionState.builder;
-
-            const barracks = createBuildingFromTemplate('foldari_barracks', {
-                x: ghost.x,
-                y: ghost.y,
-                rallyX: ghost.x + 100,
-                rallyY: ghost.y,
-                ownerId: builder.ownerId,
-            });
-
-            if (barracks) {
-                barracksList.push(barracks);
-                console.log('Barracks added to barracksList; total:', barracksList.length);
-            }
-
-            const safeOffset = (barracks?.height || 60) / 2 + getUnitRadius(builder) + 5;
-            builder.x = ghost.x;
-            builder.y = ghost.y + safeOffset;
-            builder.tx = builder.x;
-            builder.ty = builder.y;
-            builder.moving = false;
-            builder.mode = 'idle';
-
-            constructionState.ghost = null;
-            constructionState.builder = null;
-            constructionState.completed = false;
-            constructionState.buildTimer = 0;
-        }
+        updateConstructionJobs(dt);
 
         draw();
         requestAnimationFrame(loop);

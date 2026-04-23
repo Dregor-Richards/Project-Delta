@@ -20,6 +20,10 @@ export function updateEconomy({
     gathererAtRefinery,
 }) {
     for (const u of units) {
+        if (u.ownerId === 2 && u.role === 'gatherer') {
+            console.log('Enemy gatherer', u.id, 'mode', u.mode, 'carried', u.carried);
+        }
+        
         if (u.role !== 'gatherer') continue;
 
         // 1) If we were walking to a node and reached it, start mining
