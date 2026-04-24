@@ -1,6 +1,6 @@
 // Centralizes canvas mouse input, selection, and commands.
 
-const LOCAL_PLAYER_ID = 1;
+import { findIdleWorkers } from './targeting.js';
 
 export function createInputController({
   canvas,
@@ -19,10 +19,43 @@ export function createInputController({
   isPointInBarracks,
   refreshUI,
   startConstructionJob,
+  localPlayerId,
+  focusCameraOn,
 }) {
   const dragStart = { x: 0, y: 0 };
   const dragEnd = { x: 0, y: 0 };
   let isDragging = false;
+
+  // --- Idle worker selection state (moved OUT of handlers) ---
+  let lastIdleWorkerIndex = -1;
+
+  function selectIdleWorker() {
+    const idleWorkers = findIdleWorkers(units, localPlayerId);
+    if (idleWorkers.length === 0) {
+      return;
+    }
+
+    // Advance index cyclically
+    lastIdleWorkerIndex = (lastIdleWorkerIndex + 1) % idleWorkers.length;
+    const worker = idleWorkers[lastIdleWorkerIndex];
+
+    // Clear all selections
+    for (const u of units) {
+      u.selected = false;
+    }
+
+    // Select this worker
+    worker.selected = true;
+
+    // Focus camera on the worker
+    if (focusCameraOn) {
+      focusCameraOn(worker.x, worker.y);
+    }
+
+    if (refreshUI) {
+      refreshUI();
+    }
+  }
 
   // Screen (client) -> world using camera
   function screenToWorldPos(clientX, clientY) {
@@ -44,33 +77,33 @@ export function createInputController({
   canvas.addEventListener('mousedown', (e) => {
     const pos = screenToWorldPos(e.clientX, e.clientY);
 
-  if (e.button === 0) {
-    // PLACEMENT CLICK
-    if (constructionState.mode === 'placing') {
-      // Decide which unit is the builder:
-      // simplification: first selected unit, or specifically a gatherer
-      const selectedUnits = getSelectedUnits();
-      const builder = selectedUnits.find(u => u.role === 'gatherer') || selectedUnits[0];
+    if (e.button === 0) {
+      // PLACEMENT CLICK
+      if (constructionState.mode === 'placing') {
+        // Decide which unit is the builder:
+        const selectedUnits = getSelectedUnits();
+        const builder =
+          selectedUnits.find((u) => u.role === 'gatherer') || selectedUnits[0];
 
-      if (!builder) {
-        console.log('No builder selected; cannot start construction.');
-        constructionState.mode = 'idle';
+        if (!builder) {
+          console.log('No builder selected; cannot start construction.');
+          constructionState.mode = 'idle';
+          constructionState.preview = null;
+          return;
+        }
+
+        startConstructionJob({
+          x: pos.x,
+          y: pos.y,
+          builder,
+        });
+
         constructionState.preview = null;
+        constructionState.mode = 'idle';
+
+        console.log('Placed barracks ghost at', pos.x, pos.y);
         return;
       }
-
-      startConstructionJob({
-        x: pos.x,
-        y: pos.y,
-        builder,
-      });
-
-      constructionState.preview = null;
-      constructionState.mode = 'idle';
-
-      console.log('Placed barracks ghost at', pos.x, pos.y);
-      return;
-    }
 
       let somethingSelected = false;
 
@@ -84,30 +117,30 @@ export function createInputController({
       }
 
       if (clickedBarracks) {
-        barracksList.forEach(b => (b.selected = false));
+        barracksList.forEach((b) => (b.selected = false));
         clickedBarracks.selected = true;
         refinery.selected = false;
-        units.forEach(u => (u.selected = false));
+        units.forEach((u) => (u.selected = false));
         somethingSelected = true;
         isDragging = false;
       } else if (isPointInRefinery(refinery, pos.x, pos.y)) {
         refinery.selected = true;
-        barracksList.forEach(b => (b.selected = false));
+        barracksList.forEach((b) => (b.selected = false));
         units.forEach((u) => (u.selected = false));
         somethingSelected = true;
         isDragging = false;
       } else {
         let clickedUnit = null;
-      for (const u of units) {
-        if (u.ownerId !== LOCAL_PLAYER_ID) continue;
-        if (isPointInUnit(pos.x, pos.y, u)) {
-          clickedUnit = u;
-          break;
+        for (const u of units) {
+          if (u.ownerId !== localPlayerId) continue;
+          if (isPointInUnit(pos.x, pos.y, u)) {
+            clickedUnit = u;
+            break;
+          }
         }
-      }
         if (clickedUnit) {
           refinery.selected = false;
-          barracksList.forEach(b => (b.selected = false));
+          barracksList.forEach((b) => (b.selected = false));
           units.forEach((u) => (u.selected = false));
           clickedUnit.selected = true;
           somethingSelected = true;
@@ -117,7 +150,7 @@ export function createInputController({
 
       if (!somethingSelected) {
         refinery.selected = false;
-        barracksList.forEach(b => (b.selected = false));
+        barracksList.forEach((b) => (b.selected = false));
         units.forEach((u) => (u.selected = false));
         isDragging = true;
         dragStart.x = pos.x;
@@ -220,7 +253,7 @@ export function createInputController({
       }
       if (anyUnitSelected) {
         refinery.selected = false;
-        barracksList.forEach(b => (b.selected = false));
+        barracksList.forEach((b) => (b.selected = false));
       }
       refreshUI();
     }
@@ -236,5 +269,6 @@ export function createInputController({
     },
     // Expose for reuse from main (e.g. zoom wheel & other tools)
     screenToWorldPos,
+    selectIdleWorker, // now in scope
   };
 }

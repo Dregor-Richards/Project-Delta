@@ -11,6 +11,18 @@ and the AI should train a standing army of 3 melee and 3 ranged units (Covering 
 Once they've trained this, I want them to march that army over to the player's base to attack their units.
 We don't have time for this now, but I'd love an idea of how this might play out in the code!
 
+    Refactor From Main:
+    Extract targeting helpers to targeting.js:
+    isWorkerUnit, isIdle → isUnitIdleWorker, hasIdleWorker, findIdleWorkers.
+    Switch selectIdleWorker in main.js to call findIdleWorkers from targeting.js. Confirm it still works.
+    Move selectIdleWorker into input.js, expose it from createInputController, and call input.selectIdleWorker() in the key handler.
+    Move updateIdleWorkerWarning into uiController.js:
+    Pass LOCAL_PLAYER_ID and idleWorkerWarningEl into createUIController.
+    Have ui.refreshUI() or a dedicated ui.updateIdleWorkerWarning() handle it.
+    Extract menu + pause logic into uiMenu.js:
+    Make sure setPaused still lives in main.js and is passed in.
+    Extract construction jobs into production.js/construction.js.
+
  - Attack Move Command ("A" then click)
  - Right Click Context (Enemy = Attack, Resource = Mine)
  - Double-Click Select All Same Type

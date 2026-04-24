@@ -1,3 +1,5 @@
+import { hasIdleWorker } from './targeting.js';
+
 export function createUIController({
   LOCAL_PLAYER_ID,
   // DOM elements
@@ -6,12 +8,13 @@ export function createUIController({
   popCapEl,
   buildBarracksBtn,
   buildingUi,
-  trainBtn,        // legacy, can be removed later
+  trainBtn,
   trainMeleeBtn,
   trainRangedBtn,
   trainProgress,
   trainProgressFill,
   trainTimeLabel,
+  idleWorkerWarningEl,   // NEW
   // Game state / data
   units,
   barracksList,
@@ -30,6 +33,17 @@ export function createUIController({
   constructionState,
 }) {
   // --- Internal helpers ---
+
+  function updateIdleWorkerWarning() {
+    if (!idleWorkerWarningEl) return;
+
+    const idle = hasIdleWorker(units, LOCAL_PLAYER_ID);
+    if (idle) {
+      idleWorkerWarningEl.classList.remove('hidden');
+    } else {
+      idleWorkerWarningEl.classList.add('hidden');
+    }
+  }
 
   function refreshResources() {
     if (!scrapsAmountEl) return;
@@ -357,6 +371,7 @@ export function createUIController({
     refreshResources,
     refreshPopulation,
     refreshUI,
-    updateTrainControls, // exposed in case you need it explicitly
+    updateTrainControls,
+    updateIdleWorkerWarning,
   };
 }
