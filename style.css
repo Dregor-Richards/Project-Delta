@@ -424,6 +424,17 @@ body.setup-page {
   font-weight: bold;
 }
 
+.idle-worker-warning {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #ffeb3b;          /* yellowish warning */
+  text-align: right;       /* align with the HUD on the right */
+}
+
+.idle-worker-warning.hidden {
+  display: none;
+}
+
 
     /* BUILDING/UNIT UI PANEL ELEMENTS */
 

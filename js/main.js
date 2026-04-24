@@ -173,22 +173,12 @@ window.addEventListener('DOMContentLoaded', () => {
     // Initial focus: the local player's refinery
     focusCameraOn(refinery.x, refinery.y);
 
-    // Hotkey: Space refocuses camera on base (local player's refinery)
-    window.addEventListener('keydown', (e) => {
-        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
-            return;
-        }
-        if (e.code === 'Space') {
-            e.preventDefault();
-            focusCameraOn(refinery.x, refinery.y);
-        }
-    });
-
     const scrapsAmountEl = document.getElementById('scraps-amount');
     const popAmountEl = document.getElementById('pop-amount');
     const popCapEl = document.getElementById('pop-cap');
     const olivesAmountEl = document.getElementById('olives-amount');
     const prismsAmountEl = document.getElementById('prisms-amount');
+    const idleWorkerWarningEl = document.getElementById('idle-worker-warning');
     const buildBarracksBtn = document.getElementById('build-barracks-btn');
     const buildingUi = document.getElementById('building-ui');
     const trainBtn = document.getElementById('train-unit-btn');
@@ -286,24 +276,6 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            // If settings open, close it first
-            if (settingsModal && !settingsModal.classList.contains('hidden')) {
-                closeSettings();
-                return;
-            }
-
-            // If game menu open, close it (and maybe unpause)
-            if (gameMenuModal && !gameMenuModal.classList.contains('hidden')) {
-                closeGameMenu();
-            } else {
-                // Otherwise, open menu and pause
-                openGameMenu();
-            }
-        }
-    });
-
     // Construction system
     let constructionState = {
         mode: 'idle',     // 'idle' | 'placing'
@@ -313,6 +285,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     let lastTime = 0;
     let isPaused = false;
+    let lastIdleWorkerIndex = -1;
 
     function setPaused(paused) {
         isPaused = paused;
@@ -425,6 +398,52 @@ window.addEventListener('DOMContentLoaded', () => {
     function getScraps() { return scraps; }
     function setScraps(value) { scraps = value; }
 
+    function isWorkerUnit(u) {
+        // Adjust this to match your actual unit structure:
+        // Maybe u.role === 'worker', or u.type === 'gatherer', or u.isWorker === true, etc.
+        return u.ownerId === LOCAL_PLAYER_ID && u.type === 'gatherer';
+    }
+
+    function isIdle(u) {
+        // Adjust this to your actual state fields:
+        // Examples you might have: u.mode === 'idle', u.state === 'idle', !u.moving && !u.attacking, etc.
+        return isWorkerUnit(u) && u.mode === 'idle' && !u.moving;
+    }
+
+        function updateIdleWorkerWarning() {
+        if (!idleWorkerWarningEl) return;
+
+        const hasIdleWorker = units.some((u) => isIdle(u));
+
+        if (hasIdleWorker) {
+            idleWorkerWarningEl.classList.remove('hidden');
+        } else {
+            idleWorkerWarningEl.classList.add('hidden');
+        }
+    }
+
+    function selectIdleWorker() {
+        const idleWorkers = units.filter(isIdle);
+        if (idleWorkers.length === 0) {
+            // No idle workers – nothing to do (later: play a "fail" sound)
+            return;
+        }
+        // Advance index cyclically
+        lastIdleWorkerIndex = (lastIdleWorkerIndex + 1) % idleWorkers.length;
+        const worker = idleWorkers[lastIdleWorkerIndex];
+        // Clear all selections
+        for (const u of units) {
+            u.selected = false;
+        }
+        // Select this worker
+        worker.selected = true;
+        // Focus camera on the worker
+        const { x, y } = worker;
+        focusCameraOn(x, y);
+        // Optionally refresh UI so building/unit panels update
+        ui.refreshUI();
+    }
+
     // --- Camera-related input: mouse wheel zoom ---
     canvas.addEventListener('wheel', (e) => {
         e.preventDefault();
@@ -490,6 +509,47 @@ window.addEventListener('DOMContentLoaded', () => {
         isPointInBarracks,
         refreshUI: ui.refreshUI,
         startConstructionJob,
+    });
+
+        window.addEventListener('keydown', (e) => {
+        // Ignore keypresses when typing in inputs/textareas
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+            return;
+        }
+
+        // SPACE: refocus camera on base
+        if (e.code === 'Space') {
+            e.preventDefault();
+            focusCameraOn(refinery.x, refinery.y);
+            return;
+        }
+
+        // ESC: toggle menus / pause
+        if (e.key === 'Escape') {
+            if (settingsModal && !settingsModal.classList.contains('hidden')) {
+                closeSettings();
+                return;
+            }
+
+            if (gameMenuModal && !gameMenuModal.classList.contains('hidden')) {
+                closeGameMenu();
+            } else {
+                openGameMenu();
+            }
+            return;
+        }
+
+        // I: select idle worker
+        if (e.code === 'Backslash' || e.key === '\\') {
+            e.preventDefault();
+            // Do not select workers while in menus / paused for menu reasons?
+            // Up to you – I’d ignore when menu is open:
+            if (gameMenuModal && !gameMenuModal.classList.contains('hidden')) return;
+            if (settingsModal && !settingsModal.classList.contains('hidden')) return;
+
+            selectIdleWorker();
+            return;
+        }
     });
 
     function draw() {
@@ -697,6 +757,7 @@ window.addEventListener('DOMContentLoaded', () => {
             ui.refreshResources();
         }
 
+        updateIdleWorkerWarning();
         updateConstructionJobs(dt);
 
         draw();
@@ -707,6 +768,7 @@ window.addEventListener('DOMContentLoaded', () => {
     ui.refreshUI();
     ui.refreshResources();
     ui.refreshPopulation();
+    updateIdleWorkerWarning();
 
     requestAnimationFrame((t) => {
         lastTime = t;
