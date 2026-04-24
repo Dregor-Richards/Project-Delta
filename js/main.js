@@ -198,6 +198,112 @@ window.addEventListener('DOMContentLoaded', () => {
     const trainProgressFill = document.getElementById('train-progress-fill');
     const trainTimeLabel = document.getElementById('train-time-label');
 
+        // --- Game menu & settings modals ---
+    const gameMenuButton = document.getElementById('game-menu-button');
+    const gameMenuModal = document.getElementById('game-menu-modal');
+    const menuSettingsBtn = document.getElementById('menu-settings-btn');
+    const menuRestartBtn = document.getElementById('menu-restart-btn');
+    const menuMainMenuBtn = document.getElementById('menu-main-menu-btn');
+    const menuCloseBtn = document.getElementById('menu-close-btn');
+    const settingsModal = document.getElementById('settings-modal');
+    const settingsCloseBtn = document.getElementById('settings-close-btn');
+
+    function openGameMenu() {
+        gameMenuModal.classList.remove('hidden');
+        setPaused(true);
+    }
+
+    function closeGameMenu() {
+        gameMenuModal.classList.add('hidden');
+        // Only unpause if settings isn’t open (so nested settings doesn’t resume the game)
+        if (settingsModal.classList.contains('hidden')) {
+            setPaused(false);
+        }
+    }
+
+    function openSettings() {
+        settingsModal.classList.remove('hidden');
+        setPaused(true);
+    }
+
+    function closeSettings() {
+        settingsModal.classList.add('hidden');
+        // If the main menu is still open, stay paused; otherwise resume
+        if (gameMenuModal.classList.contains('hidden')) {
+            setPaused(false);
+        }
+    }
+
+    if (gameMenuButton) {
+        gameMenuButton.addEventListener('click', () => {
+            openGameMenu();
+        });
+    }
+
+    if (menuCloseBtn) {
+        menuCloseBtn.addEventListener('click', () => {
+            closeGameMenu();
+        });
+    }
+
+    if (menuSettingsBtn) {
+        menuSettingsBtn.addEventListener('click', () => {
+            // Close main menu, open settings
+            closeGameMenu();
+            openSettings();
+        });
+    }
+
+    if (settingsCloseBtn) {
+        settingsCloseBtn.addEventListener('click', () => {
+            closeSettings();
+        });
+    }
+
+    if (menuRestartBtn) {
+        menuRestartBtn.addEventListener('click', () => {
+            // Reload the current level page
+            window.location.reload();
+        });
+    }
+
+    if (menuMainMenuBtn) {
+        menuMainMenuBtn.addEventListener('click', () => {
+            // Navigate back to main menu
+            window.location.href = '../index.html';
+        });
+    }
+
+    gameMenuModal?.addEventListener('click', (e) => {
+        if (e.target === gameMenuModal || e.target.classList.contains('game-menu-backdrop')) {
+            closeGameMenu();
+        }
+    });
+
+    settingsModal?.addEventListener('click', (e) => {
+        if (e.target === settingsModal || e.target.classList.contains('game-menu-backdrop')) {
+            closeSettings();
+        }
+    });
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            // If settings open, close it first
+            if (settingsModal && !settingsModal.classList.contains('hidden')) {
+                closeSettings();
+                return;
+            }
+
+            // If game menu open, close it (and maybe unpause)
+            if (gameMenuModal && !gameMenuModal.classList.contains('hidden')) {
+                closeGameMenu();
+            } else {
+                // Otherwise, open menu and pause
+                openGameMenu();
+            }
+        }
+    });
+
     // Construction system
     let constructionState = {
         mode: 'idle',     // 'idle' | 'placing'
@@ -206,6 +312,15 @@ window.addEventListener('DOMContentLoaded', () => {
     let constructionJobs = []; // array of active builds
 
     let lastTime = 0;
+    let isPaused = false;
+
+    function setPaused(paused) {
+        isPaused = paused;
+    }
+
+    function togglePaused() {
+        isPaused = !isPaused;
+    }
 
     function startConstructionJob({ x, y, builder }) {
         const width = 80;
@@ -267,13 +382,12 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // prune finished jobs
     constructionJobs = constructionJobs.filter(job => !job.completed);
     }
 
     // --- Game-level helpers that still live in main ---
 
-        // --- Population wiring (using population.js) ---
+    // --- Population wiring (using population.js) ---
 
     // Adapter: count units for a given owner via population.js
     function getPlayerUnitCount(ownerId) {
@@ -523,6 +637,15 @@ window.addEventListener('DOMContentLoaded', () => {
     function loop(timestamp) {
         const dt = (timestamp - lastTime) / 1000;
         lastTime = timestamp;
+
+        if (isPaused) {
+            // Only update lastTime to current timestamp so dt stays small on resume
+            lastTime = timestamp;
+            // Still draw (so menus / overlays render)
+            draw();
+            requestAnimationFrame(loop);
+            return;
+        }
 
         // Camera movement
         camera.update(dt);

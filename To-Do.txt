@@ -1,6 +1,4 @@
-Timer
-
-Alright. So I'm not entirely sure how the larger RTS games handle their AI, but I assume they have a large set of 
+*Alright. So I'm not entirely sure how the larger RTS games handle their AI, but I assume they have a large set of 
 "If this, do this" conditionals to determine the choices they make 
 (While adding something to make them at least seem natural in flow).
 For our starting AI here, now that they gather, I want them to spend resources when they have enough, 
@@ -13,64 +11,49 @@ and the AI should train a standing army of 3 melee and 3 ranged units (Covering 
 Once they've trained this, I want them to march that army over to the player's base to attack their units.
 We don't have time for this now, but I'd love an idea of how this might play out in the code!
 
-Hotkeys:
-Ctrl + 1–9: assign current selection to group.
-1–9: recall group (select units in that group).
-Shift + 1–9: add current selection to group (optional v1).
-Double‑tap 1–9: snap camera to that group (maybe later).
-Select all military units (global or on‑screen).
-Select idle worker (cycle) — classic key is F1 in StarCraft.
-Attack‑move hotkey (almost always A in RTS).
-Stop (often S).
-Hold position (often H).
-Patrol (often P, maybe later).
-Refocus on base (you suggested this—good call).
-Bind Q/W/E/R or a grid to “Train melee”, “Train worker”, “Build barracks”, etc.
-
---- 04/20 ---
+ - Idle Worker Hotkey
+ - Attack Move Command ("A" then click)
+ - Right Click Context (Enemy = Attack, Resource = Mine)
+ - Double-Click Select All Same Type
+ - Make Drag Select Military/Gatherer Specific
  - Make gatherers Fight Back When Attacked
- - Right Click Content (Enemy=Attack, Resource=Mine, etc.)
+ - Military Unit Stance (Aggro/Defen/Hold, etc.)
+ - Shift Queue Orders
+ - Simple AI Behaviors*
+ - Basic Win/Loss Conditions
+ - Ctrl + 1–9: assign current selection to group.
+ - Stop (often S).
+ - Hold position (often H).
+ - Patrol (often P, maybe later).
+ - Select all military units (global or on‑screen).
+ - Select idle worker (cycle) — classic key is F1 in StarCraft.
+ - Bind Q/W/E/R or a grid to “Train melee”, “Train worker”, “Build barracks”, etc.
+ - UI Panel for selected Unit/Building
+ - Production Queue Per Building Display
+ - Make Build Queue
+ - Resource/Income Rate Indicator
+ - Objective Tracker (For Quests, Scenario Levels, etc.)
+ - Saving/Loading Settings (Volume, Hotkeys)
  - Move Order Marker (When telling to go somewhere, briefly shows marker to confirm it happened)
---- 04/21 ---
- - Make Drag select military gatherer specific
  - Add Hover Over Resources To See Remaining Value
  - Change cursor for context (Hovered enemy, selectable character, etc.)
---- 04/22 ---
- - UI Panel for selected Unit/Building
- - Resource/Income Rate Indicator
- - Production Queue Per Building Display
---- 04/23 ---
- - Make Build Queue
- - Attack Move Command ("A" then clcik)
---- 04/24 ---
- - Military Unit Stances (Aggro/Defen/Hold, etc.)
- - Shift Queue Orders
---- 04/25 ---
- - Double-Click Select All Same Type
- - Control Grups (Ctrl+1, etc.)
- - Idle Worker Hotkey
---- 04/27 ---
- - Pause & Time Adjust
- - Restart Level button
---- 04/28 ---
- - Basic Win/Loss Conditions
---- 04/29 ---
- - Select Noise
+ - Combat Hit Flashes / Death Animations
+ - Timer
+ - Minimap
  - Build Noises
  - Gather Start Noise
+ - Select Noise
  - Background Music
---- 04/30 ---
- - Volume Mechanics For Music/SFX
  - Visual Assets
---- 05/01 ---
- - Objective Tracker (For Quests, Scenario Levels, etc.)
- - Minimap
---- 05/02 ---
  - Chatbox (& Cheats)
- - Comat Hit Flashes / Death Animations
---- 05/03 ---
- - Simple AI Behaviors
- - Saving/Loading Settings (Volume, Hotkeys)
+
+Shift + 1–9: add current selection to group (optional v1).
+Double‑tap 1–9: snap camera to that group (maybe later).
+
+A Settings Modal:
+     - Time Adjust
+     - Volume for Music/SFX
+
  - Debug Overlay & Dev Tools
 
 

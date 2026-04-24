@@ -6,6 +6,32 @@
   <link rel="stylesheet" href="../style.css" />
 </head>
 <body class="level">
+    <!-- Top-left game menu button -->
+    <button id="game-menu-button" class="game-menu-button">
+        ☰
+    </button>
+    <!-- Game menu modal -->
+    <div id="game-menu-modal" class="game-menu-modal hidden">
+        <div class="game-menu-backdrop"></div>
+        <div class="game-menu-content">
+            <h2>Game Menu</h2>
+            <button id="menu-settings-btn">Settings</button>
+            <button id="menu-restart-btn">Restart Level</button>
+            <button id="menu-main-menu-btn">Main Menu</button>
+            <button id="menu-close-btn" class="menu-close">Close</button>
+        </div>
+    </div>
+
+    <!-- Settings modal (empty for now) -->
+    <div id="settings-modal" class="game-menu-modal hidden">
+        <div class="game-menu-backdrop"></div>
+        <div class="game-menu-content">
+            <h2>Settings</h2>
+            <p>Settings coming soon.</p>
+            <button id="settings-close-btn" class="menu-close">Close</button>
+        </div>
+    </div>
+
     <div id="resource-hud">
     <!-- Scraps -->
     <div class="hud-row">
