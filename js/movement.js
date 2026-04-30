@@ -1,6 +1,7 @@
 // movement.js
 // Handles per-frame unit movement, collision with buildings, and copper separation.
 
+
 /**
  * @param {Object} params
  * @param {number} params.dt
@@ -26,7 +27,9 @@ export function updateMovement({
 }) {
     // --- Movement for all units ---
     for (const u of units) {
+        // Skip movement if unit is attack-moving and currently in combat
         if (u.isAttackMoving && u.inCombat) continue;
+        
         if (!u.moving) continue;
 
         const oldX = u.x;
@@ -39,6 +42,24 @@ export function updateMovement({
             u.x = u.tx;
             u.y = u.ty;
             u.moving = false;
+            
+            // Check if this is a patrol unit reaching waypoint
+            if (u.isPatrolling && u.patrolStart && u.patrolEnd) {
+                if (u.patrolPhase === 'toEnd') {
+                    // Reached patrol end, head back to start
+                    u.tx = u.patrolStart.x;
+                    u.ty = u.patrolStart.y;
+                    u.moving = true;
+                    u.patrolPhase = 'toStart';
+                } else if (u.patrolPhase === 'toStart') {
+                    // Reached patrol start, head back to end
+                    u.tx = u.patrolEnd.x;
+                    u.ty = u.patrolEnd.y;
+                    u.moving = true;
+                    u.patrolPhase = 'toEnd';
+                }
+            }
+            
             // no "continue" so other systems see the final position
         } else {
             const step = u.speed * dt;
@@ -46,6 +67,21 @@ export function updateMovement({
                 u.x = u.tx;
                 u.y = u.ty;
                 u.moving = false;
+                
+                // ALSO check patrol here (same as above)
+                if (u.isPatrolling && u.patrolStart && u.patrolEnd) {
+                    if (u.patrolPhase === 'toEnd') {
+                        u.tx = u.patrolStart.x;
+                        u.ty = u.patrolStart.y;
+                        u.moving = true;
+                        u.patrolPhase = 'toStart';
+                    } else if (u.patrolPhase === 'toStart') {
+                        u.tx = u.patrolEnd.x;
+                        u.ty = u.patrolEnd.y;
+                        u.moving = true;
+                        u.patrolPhase = 'toEnd';
+                    }
+                }
             } else {
                 u.x += (dx / dist) * step;
                 u.y += (dy / dist) * step;

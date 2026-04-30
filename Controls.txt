@@ -1,0 +1,7 @@
+Arrow Keys move camera (Also, mouse to edge does the same)
+S stops current selected units orders
+Space returns view to base
+/ Selects an idle gatherer
+P allows setting a patrol from current location to target
+Left click selects, or orders if A/P used
+Right click otherwise gives orders for movement, rally points

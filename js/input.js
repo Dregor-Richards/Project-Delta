@@ -27,6 +27,7 @@ export function createInputController({
   let isDragging = false;
 
   let isAttackMoveMode = false;
+  let isPatrolMode = false;
 
   // --- Idle worker selection state (moved OUT of handlers) ---
   let lastIdleWorkerIndex = -1;
@@ -154,6 +155,23 @@ export function createInputController({
 
         isAttackMoveMode = false;
         console.log('Attack-move destination set at', pos.x, pos.y);
+        return;
+      }
+
+      // PATROL CLICK
+      if (isPatrolMode) {
+        const selectedUnits = getSelectedUnits();
+        for (const u of selectedUnits) {
+          u.patrolStart = { x: u.x, y: u.y };
+          u.patrolEnd = { x: pos.x, y: pos.y };
+          u.tx = pos.x;
+          u.ty = pos.y;
+          u.moving = true;
+          u.isPatrolling = true;
+          u.patrolPhase = 'toEnd'; // 'toEnd' or 'toStart'
+        }
+        isPatrolMode = false;
+        console.log('Patrol destination set at', pos.x, pos.y);
         return;
       }
 
@@ -330,7 +348,7 @@ export function createInputController({
     }
   });
 
-  // Attack-move and Stop hotkeys
+  // Attack-move, Stop, and Patrol hotkeys
   window.addEventListener('keydown', (e) => {
     const selectedUnits = getSelectedUnits();
     
@@ -356,6 +374,11 @@ export function createInputController({
           u.attackMoveDest = null;
           u.inCombat = false;
           
+          // Cancel patrol
+          u.isPatrolling = false;
+          u.patrolStart = null;
+          u.patrolEnd = null;
+          
           // Cancel gathering (if gatherer)
           if (u.role === 'gatherer') {
             u.mining = false;
@@ -366,6 +389,11 @@ export function createInputController({
         }
         
         console.log(`Stopped ${selectedUnits.length} unit(s)`);
+      }
+    } else if (e.key === 'p' || e.key === 'P') {
+      if (selectedUnits.length > 0) {
+        isPatrolMode = true;
+        console.log('Patrol mode activated. Click to set patrol destination.');
       }
     }
   });
@@ -382,5 +410,6 @@ export function createInputController({
     screenToWorldPos,
     selectIdleWorker, // now in scope
     getAttackMoveMode: () => isAttackMoveMode,
+    getPatrolMode: () => isPatrolMode,
   };
 }

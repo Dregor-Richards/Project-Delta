@@ -19,9 +19,7 @@ We don't have time for this now, but I'd love an idea of how this might play out
  - Make gatherers Fight Back When Attacked
  - Basic Win/Loss Conditions
  - Ctrl + 1–9: assign current selection to group.
- - Stop (often S).
  - Hold position (often H).
- - Patrol (often P, maybe later).
  - Select all military units (global or on‑screen).
  - Select idle worker (cycle) — classic key is F1 in StarCraft.
  - Bind Q/W/E/R or a grid to “Train melee”, “Train worker”, “Build barracks”, etc.
