@@ -144,8 +144,27 @@ export function drawBarracks(ctx, b) {
     }
 }
 
+const refineryImage = new Image();
+refineryImage.src = 'assets/visuals/buildings/Command Tent 1.png'; // Add ../ to the front to load
+let refineryImageLoaded = false;
+refineryImage.onload = () => {
+  refineryImageLoaded = true;
+};
+
 export function drawRefinery(ctx, r) {
-    const half = r.size / 2;
+  const half = r.size / 2;
+
+  // Draw the sprite if it's loaded
+  if (refineryImageLoaded) {
+    // We treat r.x, r.y as center, and r.size as both width and height.
+    const drawX = r.x - half;
+    const drawY = r.y - half;
+    const drawW = r.size;
+    const drawH = r.size;
+
+    ctx.drawImage(refineryImage, drawX, drawY, drawW, drawH);
+  } else {
+    // Fallback: original diamond drawing while image loads
     ctx.fillStyle = '#3b74c7';
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 2;
@@ -157,19 +176,21 @@ export function drawRefinery(ctx, r) {
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
+  }
 
-    if (r.selected) {
-        const pad = 6;
-        ctx.strokeStyle = '#ff5900';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(r.x, r.y - half - pad);
-        ctx.lineTo(r.x + half + pad, r.y);
-        ctx.lineTo(r.x, r.y + half + pad);
-        ctx.lineTo(r.x - half - pad, r.y);
-        ctx.closePath();
-        ctx.stroke();
-    }
+  // Keep the selection outline exactly as before
+  if (r.selected) {
+    const pad = 6;
+    ctx.strokeStyle = '#ff5900';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(r.x, r.y - half - pad);
+    ctx.lineTo(r.x + half + pad, r.y);
+    ctx.lineTo(r.x, r.y + half + pad);
+    ctx.lineTo(r.x - half - pad, r.y);
+    ctx.closePath();
+    ctx.stroke();
+  }
 }
 
 export function drawRallyPoint(ctx, b) {

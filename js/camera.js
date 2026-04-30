@@ -14,10 +14,10 @@ export function createCamera({
   maxZoom = 2.5,
 }) {
   const keys = {
-    w: false,
-    a: false,
-    s: false,
-    d: false,
+    ArrowUp: false,
+    ArrowLeft: false,
+    ArrowDown: false,
+    ArrowRight: false,
   };
 
   let mouseX = viewWidth / 2;
@@ -76,10 +76,10 @@ export function createCamera({
       let dy = 0;
 
       // Keyboard pan
-      if (keys.w) dy -= 1;
-      if (keys.s) dy += 1;
-      if (keys.a) dx -= 1;
-      if (keys.d) dx += 1;
+      if (keys.ArrowUp) dy -= 1;
+      if (keys.ArrowDown) dy += 1;
+      if (keys.ArrowLeft) dx -= 1;
+      if (keys.ArrowRight) dx += 1;
 
       // Edge panning
       if (hasMouse) {
@@ -154,10 +154,10 @@ export function createCamera({
   // Keyboard hooks
   window.addEventListener('keydown', (e) => {
     if (e.repeat) return;
-    if (e.key === 'w' || e.key === 'W') keys.w = true;
-    if (e.key === 'a' || e.key === 'A') keys.a = true;
-    if (e.key === 's' || e.key === 'S') keys.s = true;
-    if (e.key === 'd' || e.key === 'D') keys.d = true;
+    if (e.key === 'ArrowUp') keys.ArrowUp = true;
+    if (e.key === 'ArrowLeft') keys.ArrowLeft = true;
+    if (e.key === 'ArrowDown') keys.ArrowDown = true;
+    if (e.key === 'ArrowRight') keys.ArrowRight = true;
 
     // Keyboard zoom: '+' / '=' to zoom in, '-' to zoom out
     if (e.key === '+' || e.key === '=') {
@@ -172,10 +172,10 @@ export function createCamera({
   });
 
   window.addEventListener('keyup', (e) => {
-    if (e.key === 'w' || e.key === 'W') keys.w = false;
-    if (e.key === 'a' || e.key === 'A') keys.a = false;
-    if (e.key === 's' || e.key === 'S') keys.s = false;
-    if (e.key === 'd' || e.key === 'D') keys.d = false;
+    if (e.key === 'ArrowUp') keys.ArrowUp = false;
+    if (e.key === 'ArrowLeft') keys.ArrowLeft = false;
+    if (e.key === 'ArrowDown') keys.ArrowDown = false;
+    if (e.key === 'ArrowRight') keys.ArrowRight = false;
   });
 
   return camera;
