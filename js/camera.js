@@ -9,7 +9,7 @@ export function createCamera({
   viewHeight,
   edgeSize = 20,
   edgeSpeedMultiplier = 1.0,
-  zoom = 1.0,          // 1 = default, >1 = zoom in, <1 = zoom out
+  zoom = 1.0,
   minZoom = 0.5,
   maxZoom = 2.5,
 }) {
@@ -99,7 +99,6 @@ export function createCamera({
         dx /= len;
         dy /= len;
         const effectiveSpeed = this.speed * this.edgeSpeedMultiplier;
-        // Move speed should feel consistent across zooms, so divide by zoom a bit
         const zoomFactor = 1 / this.zoom;
         this.x += dx * effectiveSpeed * dt * zoomFactor;
         this.y += dy * effectiveSpeed * dt * zoomFactor;
@@ -107,19 +106,16 @@ export function createCamera({
       }
     },
 
-    // Zoom towards a screen point (screenX, screenY in view coords)
     zoomAt(screenX, screenY, zoomFactor) {
       const oldZoom = this.zoom;
       const newZoom = Math.max(this.minZoom, Math.min(this.maxZoom, oldZoom * zoomFactor));
       if (newZoom === oldZoom) return;
 
-      // Convert screen point to world before zoom
       const worldBefore = this.screenToWorld(screenX, screenY);
 
       this.zoom = newZoom;
       this.clamp();
 
-      // After zoom, adjust x/y so the same world point stays under the cursor
       const worldAfter = this.screenToWorld(screenX, screenY);
       this.x += worldBefore.x - worldAfter.x;
       this.y += worldBefore.y - worldAfter.y;
@@ -134,7 +130,6 @@ export function createCamera({
       this.zoomAt(centerX, centerY, 1 / 1.1);
     },
 
-    // World -> screen with zoom
     worldToScreen(x, y) {
       return {
         x: (x - this.x) * this.zoom,
@@ -142,11 +137,20 @@ export function createCamera({
       };
     },
 
-    // Screen -> world with zoom
     screenToWorld(x, y) {
       return {
         x: x / this.zoom + this.x,
         y: y / this.zoom + this.y,
+      };
+    },
+
+    // NEW: Get visible viewport bounds in world coordinates
+    getViewBounds() {
+      return {
+        left: this.x,
+        right: this.x + this.viewWidth / this.zoom,
+        top: this.y,
+        bottom: this.y + this.viewHeight / this.zoom,
       };
     },
   };
@@ -159,7 +163,6 @@ export function createCamera({
     if (e.key === 'ArrowDown') keys.ArrowDown = true;
     if (e.key === 'ArrowRight') keys.ArrowRight = true;
 
-    // Keyboard zoom: '+' / '=' to zoom in, '-' to zoom out
     if (e.key === '+' || e.key === '=') {
       const centerX = camera.viewWidth / 2;
       const centerY = camera.viewHeight / 2;

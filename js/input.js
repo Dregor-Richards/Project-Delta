@@ -31,6 +31,10 @@ export function createInputController({
   // --- Idle worker selection state (moved OUT of handlers) ---
   let lastIdleWorkerIndex = -1;
 
+  let lastClickTime = 0;
+  let lastClickedUnit = null;
+  const DOUBLE_CLICK_THRESHOLD = 300;
+
   function selectIdleWorker() {
     const idleWorkers = findIdleWorkers(units, localPlayerId);
     if (idleWorkers.length === 0) {
@@ -66,6 +70,32 @@ export function createInputController({
     const cy = (clientY - rect.top) * (canvas.height / rect.height);
     camera.updateMousePosition(cx, cy);
     return camera.screenToWorld(cx, cy);
+  }
+
+  function selectAllVisibleUnitsOfType(unitType) {
+    // Get visible viewport bounds in world coordinates
+    const viewBounds = camera.getViewBounds();
+    
+    let selectedCount = 0;
+    for (const u of units) {
+      if (u.ownerId !== localPlayerId) continue; // Only select player's units
+      if (u.type !== unitType) continue; // Must match type
+      
+      // Check if unit is within visible viewport
+      if (
+        u.x >= viewBounds.left &&
+        u.x <= viewBounds.right &&
+        u.y >= viewBounds.top &&
+        u.y <= viewBounds.bottom
+      ) {
+        u.selected = true;
+        selectedCount++;
+      } else {
+        u.selected = false;
+      }
+    }
+    
+    console.log(`Double-click: selected ${selectedCount} ${unitType} units`);
   }
 
   canvas.addEventListener('mouseleave', () => {
@@ -163,8 +193,27 @@ export function createInputController({
         if (clickedUnit) {
           refinery.selected = false;
           barracksList.forEach((b) => (b.selected = false));
-          units.forEach((u) => (u.selected = false));
-          clickedUnit.selected = true;
+          
+          const now = Date.now();
+          const timeSinceLastClick = now - lastClickTime;
+          
+          // Check for double-click on same unit type
+          if (
+            timeSinceLastClick < DOUBLE_CLICK_THRESHOLD &&
+            lastClickedUnit &&
+            lastClickedUnit.type === clickedUnit.type
+          ) {
+            // DOUBLE-CLICK: Select all visible units of this type
+            selectAllVisibleUnitsOfType(clickedUnit.type);
+            lastClickedUnit = null; // Reset to prevent triple-click
+          } else {
+            // SINGLE CLICK: Select just this unit
+            units.forEach((u) => (u.selected = false));
+            clickedUnit.selected = true;
+            lastClickedUnit = clickedUnit;
+          }
+          
+          lastClickTime = now;
           somethingSelected = true;
           isDragging = false;
         }
