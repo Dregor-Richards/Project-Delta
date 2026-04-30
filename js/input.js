@@ -26,6 +26,8 @@ export function createInputController({
   const dragEnd = { x: 0, y: 0 };
   let isDragging = false;
 
+  let isAttackMoveMode = false;
+
   // --- Idle worker selection state (moved OUT of handlers) ---
   let lastIdleWorkerIndex = -1;
 
@@ -102,6 +104,26 @@ export function createInputController({
         constructionState.mode = 'idle';
 
         console.log('Placed barracks ghost at', pos.x, pos.y);
+        return;
+      }
+
+      // ATTACK-MOVE CLICK
+      if (isAttackMoveMode) {
+        const selectedUnits = getSelectedUnits();
+        const militaryUnits = selectedUnits.filter(
+          (u) => u.attackDamage > 0 && u.attackRange > 0
+        );
+
+        for (const u of militaryUnits) {
+          u.attackMoveDest = { x: pos.x, y: pos.y };
+          u.tx = pos.x;
+          u.ty = pos.y;
+          u.moving = true;
+          u.isAttackMoving = true;
+        }
+
+        isAttackMoveMode = false;
+        console.log('Attack-move destination set at', pos.x, pos.y);
         return;
       }
 
@@ -259,6 +281,21 @@ export function createInputController({
     }
   });
 
+  // Attack-move hotkey
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'a' || e.key === 'A') {
+      const selectedUnits = getSelectedUnits();
+      const militaryUnits = selectedUnits.filter(
+        (u) => u.attackDamage > 0 && u.attackRange > 0
+      );
+      
+      if (militaryUnits.length > 0) {
+        isAttackMoveMode = true;
+        console.log('Attack-move mode activated. Click to set destination.');
+      }
+    }
+  });
+
   return {
     getDragState() {
       return {
@@ -270,5 +307,6 @@ export function createInputController({
     // Expose for reuse from main (e.g. zoom wheel & other tools)
     screenToWorldPos,
     selectIdleWorker, // now in scope
+    getAttackMoveMode: () => isAttackMoveMode,
   };
 }

@@ -31,11 +31,15 @@ export function findNearestCopperNode(copperNodes, x, y) {
 /**
  * Find the closest enemy unit within attack range of attacker.
  */
-export function findClosestEnemyInRange(attacker, units) {
-  if (attacker.attackDamage <= 0 || attacker.attackRange <= 0) return null;
+export function findClosestEnemyInRange(attacker, units, customRange = null) {
+  // Use custom range if provided, otherwise use attack range
+  const searchRange = customRange !== null ? customRange : attacker.attackRange;
+  
+  if (searchRange <= 0) return null;
+  
   let bestTarget = null;
   let bestDistSq = Infinity;
-  const rangeSq = attacker.attackRange * attacker.attackRange;
+  const rangeSq = searchRange * searchRange;
 
   for (const target of units) {
     if (target === attacker) continue;

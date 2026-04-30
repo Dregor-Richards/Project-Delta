@@ -26,6 +26,7 @@ export function updateMovement({
 }) {
     // --- Movement for all units ---
     for (const u of units) {
+        if (u.isAttackMoving && u.inCombat) continue;
         if (!u.moving) continue;
 
         const oldX = u.x;
