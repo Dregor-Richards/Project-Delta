@@ -73,6 +73,34 @@ export function createInputController({
     return camera.screenToWorld(cx, cy);
   }
 
+  function selectAllMilitary() {
+    // Deselect buildings
+    refinery.selected = false;
+    barracksList.forEach((b) => (b.selected = false));
+    
+    let selectedCount = 0;
+    for (const u of units) {
+      if (u.ownerId !== localPlayerId) {
+        u.selected = false;
+        continue;
+      }
+      
+      // Check if unit has attack capabilities (military unit)
+      if (u.attackDamage > 0 && u.attackRange > 0) {
+        u.selected = true;
+        selectedCount++;
+      } else {
+        u.selected = false;
+      }
+    }
+    
+    console.log(`Selected ${selectedCount} military units`);
+    
+    if (refreshUI) {
+      refreshUI();
+    }
+  }
+
   function selectAllVisibleUnitsOfType(unitType) {
     // Get visible viewport bounds in world coordinates
     const viewBounds = camera.getViewBounds();
@@ -348,7 +376,7 @@ export function createInputController({
     }
   });
 
-  // Attack-move, Stop, and Patrol hotkeys
+// Attack-move, Stop, Patrol, and Select All Military hotkeys
   window.addEventListener('keydown', (e) => {
     const selectedUnits = getSelectedUnits();
     
@@ -395,6 +423,9 @@ export function createInputController({
         isPatrolMode = true;
         console.log('Patrol mode activated. Click to set patrol destination.');
       }
+    } else if (e.key === 'Tab') {
+      e.preventDefault(); // Prevent browser tab-switching
+      selectAllMilitary();
     }
   });
 

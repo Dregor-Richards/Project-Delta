@@ -20,7 +20,6 @@ We don't have time for this now, but I'd love an idea of how this might play out
  - Basic Win/Loss Conditions
  - Ctrl + 1–9: assign current selection to group.
  - Hold position (often H).
- - Select all military units (global or on‑screen).
  - Select idle worker (cycle) — classic key is F1 in StarCraft.
  - Bind Q/W/E/R or a grid to “Train melee”, “Train worker”, “Build barracks”, etc.
  - UI Panel for selected Unit/Building
