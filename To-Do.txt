@@ -21,7 +21,6 @@ We don't have time for this now, but I'd love an idea of how this might play out
  - Basic Win/Loss Conditions
  - Upgrade CTRL groups for buildings
  - Hold position (often H).
- - Select idle worker (cycle) — classic key is F1 in StarCraft.
  - Bind Q/W/E/R or a grid to “Train melee”, “Train worker”, “Build barracks”, etc.
  - UI Panel for selected Unit/Building
  - Production Queue Per Building Display
@@ -85,6 +84,7 @@ Tailon Glimmersmith, and his journey from the Institution to make the thousand P
  - Add Third "Craftable" Resource
  - Upgrades (& An Upgrade Building Or 2)
  - Defensive Buildings (Walls, Attacker)
+ - Population Buildings
 
 Melee Unit - Strong Health, Low Attack / Mid Healt & Attac / Low Healt, Strong Attac
     = HP, DMG, SPD: 80, 10, 1 / 100, 8, 1 / 60, 13, 1

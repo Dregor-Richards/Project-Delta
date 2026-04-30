@@ -8,13 +8,24 @@
 <body class="main-menu">
   <div class="menu-container">
     <h1>Mercenaries Of Armolga</h1>
-    <p>The coin is flowing. Rally the armies; war approaches. – click Start to begin.</p>
-    <button id="start-btn">Start</button>
+    <p>The coin is flowing. Rally the armies; war approaches.</p>
+    <button id="skirmish-btn">Skirmish</button>
+    <button id="multiplayer-btn" class="coming-later">Multiplayer - Coming Later</button>
+    <button id="campaigns-btn" class="coming-later">Campaigns - Coming Later</button>
   </div>
 
   <script>
-    document.getElementById('start-btn').addEventListener('click', () => {
+    document.getElementById('skirmish-btn').addEventListener('click', () => {
       window.location.href = 'html/setup.html';
+    });
+
+    // Optional: Add click feedback for coming-later buttons
+    document.getElementById('multiplayer-btn').addEventListener('click', () => {
+      console.log('Multiplayer feature coming soon!');
+    });
+
+    document.getElementById('campaigns-btn').addEventListener('click', () => {
+      console.log('Campaigns feature coming soon!');
     });
   </script>
 </body>
