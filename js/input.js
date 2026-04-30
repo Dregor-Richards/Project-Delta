@@ -22,6 +22,21 @@ export function createInputController({
   localPlayerId,
   focusCameraOn,
 }) {
+
+  // Control groups (0-9)
+  const controlGroups = {
+    0: [],
+    1: [],
+    2: [],
+    3: [],
+    4: [],
+    5: [],
+    6: [],
+    7: [],
+    8: [],
+    9: [],
+  };
+
   const dragStart = { x: 0, y: 0 };
   const dragEnd = { x: 0, y: 0 };
   let isDragging = false;
@@ -125,6 +140,42 @@ export function createInputController({
     }
     
     console.log(`Double-click: selected ${selectedCount} ${unitType} units`);
+  }
+
+  function recallControlGroup(groupNum) {
+    const group = controlGroups[groupNum];
+    
+    if (!group || group.length === 0) {
+      console.log(`Control group ${groupNum} is empty`);
+      return;
+    }
+    
+    // Filter out dead units (units no longer in the units array)
+    const validUnits = group.filter((u) => units.includes(u));
+    
+    // Update the stored group to remove dead units
+    controlGroups[groupNum] = validUnits;
+    
+    if (validUnits.length === 0) {
+      console.log(`Control group ${groupNum} has no living units`);
+      return;
+    }
+    
+    // Deselect everything
+    refinery.selected = false;
+    barracksList.forEach((b) => (b.selected = false));
+    units.forEach((u) => (u.selected = false));
+    
+    // Select units in this group
+    validUnits.forEach((u) => {
+      u.selected = true;
+    });
+    
+    console.log(`Recalled control group ${groupNum}: ${validUnits.length} units`);
+    
+    if (refreshUI) {
+      refreshUI();
+    }
   }
 
   canvas.addEventListener('mouseleave', () => {
@@ -376,7 +427,28 @@ export function createInputController({
     }
   });
 
-// Attack-move, Stop, Patrol, and Select All Military hotkeys
+  // Control groups: Ctrl+0-9 to assign, 0-9 to recall
+  window.addEventListener('keydown', (e) => {
+    // Check for number keys 0-9
+    const num = e.key;
+    if (num >= '0' && num <= '9') {
+      if (e.ctrlKey || e.metaKey) {
+        // Ctrl+Number: Assign current selection to group
+        e.preventDefault();
+        const selectedUnits = getSelectedUnits();
+        if (selectedUnits.length > 0) {
+          controlGroups[num] = [...selectedUnits]; // Copy the array
+          console.log(`Assigned ${selectedUnits.length} units to group ${num}`);
+        }
+      } else {
+        // Just Number: Recall group
+        e.preventDefault();
+        recallControlGroup(num);
+      }
+    }
+  });
+
+  // Attack-move, Stop, Patrol, and Select All Military hotkeys
   window.addEventListener('keydown', (e) => {
     const selectedUnits = getSelectedUnits();
     
