@@ -6,3 +6,5 @@ P allows setting a patrol from current location to target
 Left click selects, or orders if A/P used
 Right click otherwise gives orders for movement, rally points
 Tab selects all military units across the map
+CRTL+# makes a control group of selected units.
+# (A integer key, chosen with the above command) selects pre-made group

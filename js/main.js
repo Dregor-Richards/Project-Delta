@@ -30,6 +30,7 @@ import {
 import { createConstructionManager } from './production.js';
 import { getPlayerById } from './players.js';
 
+
 window.addEventListener('DOMContentLoaded', () => {
   console.log('Delta main.js DOMContentLoaded hook running');
 
@@ -45,7 +46,7 @@ window.addEventListener('DOMContentLoaded', () => {
     localPlayer.faction = storedFaction;
   }
   const LOCAL_PLAYER_FACTION = localPlayer?.faction ?? 'Foldari';
-  const ENEMY_FACTION = 'Foldari'; // for now
+  const ENEMY_FACTION = 'Foldari';
 
   // --- DOM refs (single source) ---
   const {
@@ -120,6 +121,22 @@ window.addEventListener('DOMContentLoaded', () => {
     cellSize: 40,
   });
 
+  // --- Game timer (SINGLE DECLARATION) ---
+  let gameTime = 0;
+  const timerElement = document.getElementById('game-timer');
+
+  function updateTimerDisplay() {
+    const minutes = Math.floor(gameTime / 60);
+    const seconds = Math.floor(gameTime % 60);
+    const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    timerElement.textContent = `Time: ${formattedTime}`;
+  }
+
+  function resetTimer() {
+    gameTime = 0;
+    updateTimerDisplay();
+  }
+
   // --- Camera ---
   const camera = createCamera({
     x: 0,
@@ -152,6 +169,7 @@ window.addEventListener('DOMContentLoaded', () => {
     menuCloseBtn,
     settingsModal,
     settingsCloseBtn,
+    resetTimer,
   });
 
   let lastTime = 0;
@@ -333,6 +351,12 @@ window.addEventListener('DOMContentLoaded', () => {
   function loop(timestamp) {
     const dt = (timestamp - lastTime) / 1000;
     lastTime = timestamp;
+
+      // Update game timer
+    if (!menu.isPaused()) {
+      gameTime += dt;
+      updateTimerDisplay();
+    }
 
     if (menu.isPaused()) {
       lastTime = timestamp;

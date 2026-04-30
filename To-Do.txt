@@ -33,7 +33,6 @@ We don't have time for this now, but I'd love an idea of how this might play out
  - Add Hover Over Resources To See Remaining Value
  - Change cursor for context (Hovered enemy, selectable character, etc.)
  - Combat Hit Flashes / Death Animations
- - Timer
  - Minimap
  - Build Noises
  - Gather Start Noise
@@ -44,6 +43,7 @@ We don't have time for this now, but I'd love an idea of how this might play out
 
 Shift + 1–9: add current selection to group (optional v1).
 Double‑tap 1–9: snap camera to that group (maybe later).
+Double-tap \: snap camera to an idle worker
 
 A Settings Modal:
      - Time Adjust

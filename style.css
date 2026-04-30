@@ -435,6 +435,19 @@ body.setup-page {
   display: none;
 }
 
+.game-timer {
+  position: absolute;
+  top: 120px; /* Adjust based on where idle worker warning sits */
+  left: 30px;
+  font-size: 14px;
+  color: #ffffff;
+  background: rgba(21, 239, 14, 0.7);
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-family: monospace;
+  z-index: 100;
+}
+
 
     /* BUILDING/UNIT UI PANEL ELEMENTS */
 

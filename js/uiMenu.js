@@ -9,6 +9,7 @@ export function createMenuController({
   menuCloseBtn,
   settingsModal,
   settingsCloseBtn,
+  resetTimer,  // NEW: callback to reset the game timer
 }) {
   let paused = false;
 
@@ -30,7 +31,6 @@ export function createMenuController({
     if (!gameMenuModal) return;
     gameMenuModal.classList.add('hidden');
 
-    // Only unpause if settings isn’t open (so nested settings doesn’t resume the game)
     if (settingsModal && settingsModal.classList.contains('hidden')) {
       setPaused(false);
     }
@@ -46,7 +46,6 @@ export function createMenuController({
     if (!settingsModal) return;
     settingsModal.classList.add('hidden');
 
-    // If the main menu is still open, stay paused; otherwise resume
     if (!gameMenuModal || gameMenuModal.classList.contains('hidden')) {
       setPaused(false);
     }
@@ -68,7 +67,6 @@ export function createMenuController({
 
   if (menuSettingsBtn) {
     menuSettingsBtn.addEventListener('click', () => {
-      // Close main menu, open settings
       closeGameMenu();
       openSettings();
     });
@@ -82,6 +80,10 @@ export function createMenuController({
 
   if (menuRestartBtn) {
     menuRestartBtn.addEventListener('click', () => {
+      // Reset timer before reloading
+      if (resetTimer) {
+        resetTimer();
+      }
       window.location.reload();
     });
   }
@@ -107,10 +109,8 @@ export function createMenuController({
   // --- Keyboard helper for Escape handling ---
 
   function handleKeyDown(e) {
-    // ESC: toggle menus / pause
     if (e.key === 'Escape') {
       if (settingsModal && !settingsModal.classList.contains('hidden')) {
-        // If settings is open, close it first
         closeSettings();
         return;
       }
