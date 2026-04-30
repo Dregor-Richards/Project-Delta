@@ -330,10 +330,11 @@ export function createInputController({
     }
   });
 
-  // Attack-move hotkey
+  // Attack-move and Stop hotkeys
   window.addEventListener('keydown', (e) => {
+    const selectedUnits = getSelectedUnits();
+    
     if (e.key === 'a' || e.key === 'A') {
-      const selectedUnits = getSelectedUnits();
       const militaryUnits = selectedUnits.filter(
         (u) => u.attackDamage > 0 && u.attackRange > 0
       );
@@ -341,6 +342,30 @@ export function createInputController({
       if (militaryUnits.length > 0) {
         isAttackMoveMode = true;
         console.log('Attack-move mode activated. Click to set destination.');
+      }
+    } else if (e.key === 's' || e.key === 'S') {
+      if (selectedUnits.length > 0) {
+        for (const u of selectedUnits) {
+          // Cancel movement
+          u.moving = false;
+          u.tx = u.x;
+          u.ty = u.y;
+          
+          // Cancel attack-move
+          u.isAttackMoving = false;
+          u.attackMoveDest = null;
+          u.inCombat = false;
+          
+          // Cancel gathering (if gatherer)
+          if (u.role === 'gatherer') {
+            u.mining = false;
+            u.miningTimer = 0;
+            u.mode = 'idle';
+            u.homeNode = null;
+          }
+        }
+        
+        console.log(`Stopped ${selectedUnits.length} unit(s)`);
       }
     }
   });

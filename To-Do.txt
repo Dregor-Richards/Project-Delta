@@ -12,7 +12,6 @@ Once they've trained this, I want them to march that army over to the player's b
 We don't have time for this now, but I'd love an idea of how this might play out in the code!
 
  - Right Click Context (Enemy = Attack, Resource = Mine)
- - Double-Click Select All Same Type
  - Make Drag Select Military/Gatherer Specific
  - Military Unit Stance (Aggro/Defen/Hold, etc.)
  - Shift Queue Orders
