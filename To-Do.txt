@@ -11,6 +11,7 @@ and the AI should train a standing army of 3 melee and 3 ranged units (Covering 
 Once they've trained this, I want them to march that army over to the player's base to attack their units.
 We don't have time for this now, but I'd love an idea of how this might play out in the code!
 
+ - Add Credits Page
  - Right Click Context (Enemy = Attack, Resource = Mine)
  - Make Drag Select Military/Gatherer Specific
  - Military Unit Stance (Aggro/Defen/Hold, etc.)

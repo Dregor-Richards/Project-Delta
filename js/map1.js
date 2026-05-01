@@ -112,5 +112,6 @@ export function createMap1({ canvas, localPlayerId, enemyPlayerId, localFaction,
         enemyRefinery,
         worldWidth: WORLD_WIDTH,
         worldHeight: WORLD_HEIGHT,
+        backgroundType: 'grass16',
     };
 }

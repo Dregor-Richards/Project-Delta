@@ -106,6 +106,7 @@ window.addEventListener('DOMContentLoaded', () => {
     enemyRefinery,
     worldWidth = canvas.width,
     worldHeight = canvas.height,
+    backgroundType,
   } = createSelectedMap({
     mapId: storedMapId,
     canvas,
@@ -310,6 +311,9 @@ window.addEventListener('DOMContentLoaded', () => {
     getConstructionJobs,
     getDragState: input.getDragState,
     units,
+    worldWidth,
+    worldHeight,
+    backgroundType,
   });
 
   function draw() {

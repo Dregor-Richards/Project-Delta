@@ -213,6 +213,61 @@ export function drawRallyPoint(ctx, b) {
     ctx.restore();
 }
 
+// --- Grass background texture (512x512) ---
+const grassImage = new Image();
+grassImage.src = '../assets/visuals/textures/grass16.png';
+let grassLoaded = false;
+grassImage.onload = () => {
+  grassLoaded = true;
+};
+
+export function drawGrassBackground(ctx, camera, worldWidth, worldHeight) {
+  if (!grassLoaded) return;
+
+  const tileSize = 512;
+
+  // Visible world bounds in world coordinates
+  const viewLeft   = camera.x;
+  const viewTop    = camera.y;
+  const viewRight  = camera.x + camera.viewWidth  / camera.zoom;
+  const viewBottom = camera.y + camera.viewHeight / camera.zoom;
+
+  // Clamp to world
+  const left   = Math.max(0, viewLeft);
+  const top    = Math.max(0, viewTop);
+  const right  = Math.min(worldWidth, viewRight);
+  const bottom = Math.min(worldHeight, viewBottom);
+
+  const startTileX = Math.floor(left / tileSize);
+  const endTileX   = Math.floor(right / tileSize);
+  const startTileY = Math.floor(top / tileSize);
+  const endTileY   = Math.floor(bottom / tileSize);
+
+  ctx.save();
+  ctx.imageSmoothingEnabled = false; // keeps pixel-art crisp
+
+  for (let tx = startTileX; tx <= endTileX; tx++) {
+    for (let ty = startTileY; ty <= endTileY; ty++) {
+      const worldX = tx * tileSize;
+      const worldY = ty * tileSize;
+
+      const screen = camera.worldToScreen(worldX, worldY);
+      const screenSize = tileSize * camera.zoom;
+
+      ctx.drawImage(
+        grassImage,
+        0, 0, tileSize, tileSize,
+        screen.x,
+        screen.y,
+        screenSize,
+        screenSize
+      );
+    }
+  }
+
+  ctx.restore();
+}
+
 export function drawGrid(ctx, canvasWidth, canvasHeight, camera) {
     ctx.strokeStyle = 'rgba(255,255,255,0.04)';
     ctx.lineWidth = 1;

@@ -7,6 +7,7 @@ import {
   drawRefinery,
   drawRallyPoint,
   drawGrid,
+  drawGrassBackground,
 } from './gameRender.js';
 import { FOG_VISIBLE } from './fogOfWar.js';
 
@@ -25,9 +26,16 @@ export function createRenderer({
   getConstructionJobs,
   getDragState,
   units,
+  worldWidth,
+  worldHeight,
+  backgroundType,
 }) {
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (backgroundType === 'grass16') {
+      drawGrassBackground(ctx, camera, worldWidth, worldHeight);
+    }
 
     drawGrid(ctx, canvas.width, canvas.height, camera);
 
